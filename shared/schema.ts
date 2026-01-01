@@ -1,50 +1,41 @@
-import { sql } from "drizzle-orm";
-import { pgTable, text, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, uuid, integer, real, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  username: text("username").notNull().unique(),
-  password: text("password").notNull(),
-});
+// ==================== NOMENCLADORES ====================
 
-export const insertUserSchema = createInsertSchema(users).pick({
-  username: true,
-  password: true,
-});
-
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof users.$inferSelect;
-
+// Nomenclador de Solicitud (25 tipos)
 export const SOLICITUD_TYPES = [
   "CIERRE PROVISORIO DE ESTABLECIMIENTO",
   "CIERRE DE DIVISIONES",
   "CAMBIO DE ESTRUCTURA CURRICULAR",
-  "CAMBIO DE ESTRUCTURA CURRICULAR / MODALIDAD JÓVENES Y ADULTOS",
-  "CAMBIO DE CATEGORÍA",
-  "CAMBIO DE DENOMINACIÓN DE ESPACIO CURRICULAR",
-  "CREACIÓN DE CARGO",
-  "CONVERSIÓN DE CARGO",
-  "CREACIÓN DE CARGO DE REGENTE",
-  "CREACIÓN DE CARGO DE SECRETARIO",
-  "CREACIÓN DE CARGO DE MAESTRO SECRETARIO",
-  "CREACIÓN DE CARGO DE PRECEPTOR",
-  "CREACIÓN DE CARGO DE ASESOR PEDAGÓGICO",
-  "CREACIÓN DE CARGO DE MAESTRO ESPECIAL",
-  "CREACIÓN DE CARGO DE MAESTRO DE GRADO ESPECIAL",
-  "CREACIÓN DE CARGO DE MAESTRO ESPECIAL / PERFIL FONOAUDIÓLOGO",
-  "CREACIÓN DE SALA DE 3 AÑOS",
-  "CREACIÓN DE SALA DE 3 AÑOS / MULTIEDAD",
-  "FUSIÓN DE SALA DE 3 AÑOS",
-  "CREACIÓN Y FUSIÓN DE SALAS DE 3 Y 4 AÑOS",
-  "CREACIÓN DE SALA DE 3 AÑOS POR FUSIÓN",
-  "APERTURA DE SECCIÓN",
-  "CREACIÓN DE DIVISIÓN",
-  "CREACIÓN DE CICLO ORIENTADO",
-  "INDEPENDIZACIÓN DEL NIVEL INICIAL",
+  "AMPLIACIÓN DE ESTRUCTURA CURRICULAR",
+  "APERTURA DE DIVISIONES",
+  "REORGANIZACIÓN DE DIVISIONES",
+  "APERTURAS DE PRIMERAS DIVISIONES (NUEVAS OFERTAS EDUCATIVAS)",
+  "CAMBIO DE NIVEL DE JORNADA",
+  "CREACIÓN Y LOCALIZACIÓN DE CARGOS",
+  "REORGANIZACIÓN DE JORNADA",
+  "CAMBIO DE DENOMINACIÓN",
+  "CONVENIOS",
+  "REUBICACIÓN DE EDIFICIO",
+  "TRASLADO DE ESTABLECIMIENTO EDUCATIVO",
+  "CAMBIO DE ESTADO DE JARDINES MATERNALES",
+  "CREACIÓN DE ANEXOS",
+  "CREACIÓN DE EXTENSIONES ÁULICAS",
+  "CREACIÓN DE SECCIÓN INDEPENDIENTE",
+  "NUEVA LOCALIZACIÓN",
+  "REORGANIZACIÓN DE CARGOS",
+  "FUSIÓN DE ESTABLECIMIENTOS",
+  "READECUACIÓN DE POF",
+  "TRANSFORMACIONES DE OFERTAS EDUCATIVAS",
+  "RECONVERSIONES DE OFERTAS EDUCATIVAS",
+  "CIERRE DEFINITIVO DE ESTABLECIMIENTO",
 ] as const;
 
+export type SolicitudType = (typeof SOLICITUD_TYPES)[number];
+
+// Nomenclador de Estados (12 estados)
 export const ESTADO_TYPES = [
   "INICIAL",
   "SECUNDARIO",
@@ -60,24 +51,117 @@ export const ESTADO_TYPES = [
   "FIRMA INT.",
 ] as const;
 
-export type SolicitudType = typeof SOLICITUD_TYPES[number];
-export type EstadoType = typeof ESTADO_TYPES[number];
+export type EstadoType = (typeof ESTADO_TYPES)[number];
 
-export interface Expediente {
-  id: string;
-  expediente: string;
-  solicita: SolicitudType;
-  establecimiento: string;
-  estado: EstadoType;
-  comentario: string;
-}
+// Nomenclador de Regiones Educativas
+export const REGION_TYPES = ["I", "II", "III", "IV", "V", "VI"] as const;
+export type RegionType = (typeof REGION_TYPES)[number];
 
-export const insertExpedienteSchema = z.object({
-  expediente: z.string().min(1, "El expediente es requerido").regex(/^\d{7}\/\d{2}$/, "Formato: 1234567/26"),
-  solicita: z.enum(SOLICITUD_TYPES),
-  establecimiento: z.string().min(1, "El establecimiento es requerido"),
-  estado: z.enum(ESTADO_TYPES),
-  comentario: z.string().optional().default(""),
+// Nomenclador de Nivel para Cobertura
+export const NIVEL_COBERTURA_TYPES = ["INICIAL Y PRIMARIO", "SECUNDARIO"] as const;
+export type NivelCoberturaType = (typeof NIVEL_COBERTURA_TYPES)[number];
+
+// Nomenclador de Responsables
+export const RESPONSABLE_TYPES = [
+  "YANINA VARGAS",
+  "NOELIA VILLA",
+  "LAURA MORALES",
+  "AXEL CABRERA",
+] as const;
+export type ResponsableType = (typeof RESPONSABLE_TYPES)[number];
+
+// Nomenclador de Tipos para Estadísticas
+export const TIPO_ESTADISTICA_TYPES = ["SUPLENCIA", "INTERINATO", "TITULAR"] as const;
+export type TipoEstadisticaType = (typeof TIPO_ESTADISTICA_TYPES)[number];
+
+// Nomenclador de Juntas de Clasificación
+export const JUNTA_TYPES = ["INICIAL Y PRIMARIA", "SECUNDARIA"] as const;
+export type JuntaType = (typeof JUNTA_TYPES)[number];
+
+// Nomenclador de Módulos para Login
+export const MODULE_TYPES = ["CREACIONES", "COBERTURA"] as const;
+export type ModuleType = (typeof MODULE_TYPES)[number];
+
+// ==================== TABLAS ====================
+
+// Tabla de Expedientes (módulo CREACIONES)
+export const expedientes = pgTable("expedientes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  expediente: text("expediente").notNull(),
+  solicita: text("solicita").notNull(),
+  establecimiento: text("establecimiento").notNull(),
+  estado: text("estado").notNull(),
+  comentario: text("comentario").notNull().default(""),
 });
 
+// Tabla de Registros de Cobertura (módulo COBERTURA DE CARGOS)
+export const coberturaRegistros = pgTable("cobertura_registros", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  region: text("region").notNull(),
+  nivel: text("nivel").notNull(),
+  responsable: text("responsable").notNull(),
+  expediente: text("expediente").notNull(),
+  pedidoFileName: text("pedido_file_name"),
+  pedidoFilePath: text("pedido_file_path"),
+});
+
+// Tabla de Eventos para Dashboard 1 (estadísticas de coberturas)
+export const coberturaEventos = pgTable("cobertura_eventos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  llamado: text("llamado").notNull(),
+  juntaClasificacion: text("junta_clasificacion").notNull(),
+  tipo: text("tipo").notNull(),
+  fecha: text("fecha").notNull(),
+  establecimientos: integer("establecimientos").notNull().default(0),
+  coberturas: integer("coberturas").notNull().default(0),
+  postulantes: integer("postulantes").notNull().default(0),
+  promedio: real("promedio").notNull().default(0),
+});
+
+// Tabla de Detalles para Dashboard 2 (búsqueda completa)
+export const coberturaDetalles = pgTable("cobertura_detalles", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  llamado: text("llamado").notNull(),
+  tipo: text("tipo").notNull(),
+  fecha: text("fecha").notNull(),
+  juntaClasificacion: text("junta_clasificacion").notNull(),
+  region: text("region").notNull(),
+  localidad: text("localidad").notNull(),
+  establecimiento: text("establecimiento").notNull(),
+  nivel: text("nivel").notNull(),
+  caracter: text("caracter").notNull(),
+  descripcion: text("descripcion").notNull(),
+  apellido: text("apellido").notNull(),
+  nombre: text("nombre").notNull(),
+  dni: text("dni").notNull(),
+  habilitacion: text("habilitacion").notNull(),
+});
+
+// ==================== SCHEMAS Y TIPOS ====================
+
+// Expedientes
+export const insertExpedienteSchema = createInsertSchema(expedientes).omit({ id: true });
 export type InsertExpediente = z.infer<typeof insertExpedienteSchema>;
+export type Expediente = typeof expedientes.$inferSelect;
+
+// Cobertura Registros
+export const insertCoberturaRegistroSchema = createInsertSchema(coberturaRegistros).omit({ id: true });
+export type InsertCoberturaRegistro = z.infer<typeof insertCoberturaRegistroSchema>;
+export type CoberturaRegistro = typeof coberturaRegistros.$inferSelect;
+
+// Cobertura Eventos (Dashboard 1)
+export const insertCoberturaEventoSchema = createInsertSchema(coberturaEventos).omit({ id: true });
+export type InsertCoberturaEvento = z.infer<typeof insertCoberturaEventoSchema>;
+export type CoberturaEvento = typeof coberturaEventos.$inferSelect;
+
+// Cobertura Detalles (Dashboard 2)
+export const insertCoberturaDetalleSchema = createInsertSchema(coberturaDetalles).omit({ id: true });
+export type InsertCoberturaDetalle = z.infer<typeof insertCoberturaDetalleSchema>;
+export type CoberturaDetalle = typeof coberturaDetalles.$inferSelect;
+
+// Login Schema
+export const loginSchema = z.object({
+  module: z.enum(MODULE_TYPES),
+  pin: z.string().length(4),
+});
+export type LoginRequest = z.infer<typeof loginSchema>;
