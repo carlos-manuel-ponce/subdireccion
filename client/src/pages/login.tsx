@@ -57,74 +57,77 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md space-y-8">
-          <div className="text-center space-y-4">
+        <div className="w-full max-w-lg space-y-6">
+          <div className="text-center">
             <img 
               src={logoUrl} 
               alt="Gobierno de la Provincia - Ministerio de Educación" 
-              className="h-12 mx-auto"
+              className="h-14 mx-auto"
               data-testid="img-logo"
             />
-            <h1 className="text-2xl font-bold text-foreground" data-testid="text-login-title">
-              SUBDIRECCIÓN COBERTURA DE CARGOS
-            </h1>
-            <p className="text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
-            <Card
-              className={`p-4 cursor-pointer transition-all hover-elevate ${
-                selectedModule === "CREACIONES" ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => setSelectedModule("CREACIONES")}
-              data-testid="card-module-creaciones"
-            >
-              <div className="text-center">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-muted flex items-center justify-center">
-                  <Lock className="w-5 h-5 text-muted-foreground" />
-                </div>
-                <h3 className="font-semibold text-foreground text-sm">CREACIONES</h3>
-                <p className="text-xs text-muted-foreground mt-1">Expedientes</p>
+          <Card className="p-6">
+            <div className="space-y-6">
+              <div className="text-center space-y-2">
+                <h1 className="text-2xl font-bold text-foreground" data-testid="text-login-title">
+                  SUBDIRECCIÓN COBERTURA DE CARGOS
+                </h1>
+                <p className="text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
               </div>
-            </Card>
 
-            <Card
-              className={`p-4 cursor-pointer transition-all hover-elevate ${
-                selectedModule === "COBERTURA" ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => setSelectedModule("COBERTURA")}
-              data-testid="card-module-cobertura"
-            >
-              <div className="text-center">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-muted flex items-center justify-center">
-                  <Lock className="w-5 h-5 text-muted-foreground" />
+              <div className="grid grid-cols-3 gap-3">
+                <div
+                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                    selectedModule === "CREACIONES" ? "ring-2 ring-primary bg-muted" : ""
+                  }`}
+                  onClick={() => setSelectedModule("CREACIONES")}
+                  data-testid="card-module-creaciones"
+                >
+                  <div className="text-center">
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm">CREACIONES</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Expedientes</p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-foreground text-sm">COBERTURA</h3>
-                <p className="text-xs text-muted-foreground mt-1">Registro</p>
-              </div>
-            </Card>
 
-            <Card
-              className={`p-4 cursor-pointer transition-all hover-elevate ${
-                selectedModule === "TITULARIZACIONES" ? "ring-2 ring-primary" : ""
-              }`}
-              onClick={() => setSelectedModule("TITULARIZACIONES")}
-              data-testid="card-module-titularizaciones"
-            >
-              <div className="text-center">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-muted flex items-center justify-center">
-                  <Lock className="w-5 h-5 text-muted-foreground" />
+                <div
+                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                    selectedModule === "COBERTURA" ? "ring-2 ring-primary bg-muted" : ""
+                  }`}
+                  onClick={() => setSelectedModule("COBERTURA")}
+                  data-testid="card-module-cobertura"
+                >
+                  <div className="text-center">
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm">COBERTURA</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Registro</p>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-foreground text-sm">TITULARIZACIONES</h3>
-                <p className="text-xs text-muted-foreground mt-1">Estadísticas</p>
-              </div>
-            </Card>
-          </div>
 
-          {selectedModule && (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <Card className="p-6">
-                <div className="space-y-4">
+                <div
+                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                    selectedModule === "TITULARIZACIONES" ? "ring-2 ring-primary bg-muted" : ""
+                  }`}
+                  onClick={() => setSelectedModule("TITULARIZACIONES")}
+                  data-testid="card-module-titularizaciones"
+                >
+                  <div className="text-center">
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm">TITULARIZACIONES</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Estadísticas</p>
+                  </div>
+                </div>
+              </div>
+
+              {selectedModule && (
+                <form onSubmit={handleSubmit} className="space-y-4 pt-4 border-t border-border">
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">
                       Ingrese el PIN para <span className="font-semibold text-foreground">{selectedModule}</span>
@@ -161,10 +164,10 @@ export default function Login() {
                       </>
                     )}
                   </Button>
-                </div>
-              </Card>
-            </form>
-          )}
+                </form>
+              )}
+            </div>
+          </Card>
         </div>
       </div>
 

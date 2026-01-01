@@ -159,21 +159,25 @@ export default function CreacionesHome() {
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
       <header className="bg-card border-b border-border py-4 px-6">
-        <div className="max-w-7xl mx-auto relative">
-          <div className="flex flex-col items-center text-center">
-            <img 
-              src={logoUrl} 
-              alt="Gobierno de la Provincia - Ministerio de Educación" 
-              className="h-10 mb-2"
-              data-testid="img-logo"
-            />
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div className="flex-1">
             <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-title">CREACIONES</h1>
             <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="absolute right-0 top-1/2 -translate-y-1/2" data-testid="button-logout">
-            <LogOut className="mr-2 h-4 w-4" />
-            Salir
-          </Button>
+          <div className="flex-1 flex justify-center">
+            <img 
+              src={logoUrl} 
+              alt="Gobierno de la Provincia - Ministerio de Educación" 
+              className="h-10"
+              data-testid="img-logo"
+            />
+          </div>
+          <div className="flex-1 flex justify-end">
+            <Button variant="ghost" size="sm" onClick={handleLogout} data-testid="button-logout">
+              <LogOut className="mr-2 h-4 w-4" />
+              Salir
+            </Button>
+          </div>
         </div>
       </header>
 
