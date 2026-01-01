@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, Filter, FileText, Clock, CheckCircle, AlertCircle, Edit2, Trash2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Plus, Search, Filter, Edit2, Trash2, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -8,8 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ThemeToggle } from "@/components/theme-toggle";
-import { StatsCard } from "@/components/stats-card";
 import { EstadoBadge } from "@/components/estado-badge";
 import { ExpedienteDialog } from "@/components/expediente-dialog";
 import { DeleteDialog } from "@/components/delete-dialog";
@@ -97,12 +95,12 @@ export default function Home() {
     setCurrentPage(1);
   }, [searchQuery, estadoFilter, solicitudFilter]);
 
-  const stats = useMemo(() => {
-    const total = expedientes.length;
-    const enProceso = expedientes.filter(e => !["FIRMA MINISTRO", "FIRMA INT."].includes(e.estado)).length;
-    const pendientes = expedientes.filter(e => e.estado === "INICIAL").length;
-    const aprobados = expedientes.filter(e => ["FIRMA MINISTRO", "FIRMA INT."].includes(e.estado)).length;
-    return { total, enProceso, pendientes, aprobados };
+  const estadoStats = useMemo(() => {
+    const counts: Record<EstadoType, number> = {} as Record<EstadoType, number>;
+    ESTADO_TYPES.forEach(estado => {
+      counts[estado] = expedientes.filter(e => e.estado === estado).length;
+    });
+    return counts;
   }, [expedientes]);
 
   const handleOpenCreate = () => {
@@ -145,24 +143,32 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="bg-primary text-primary-foreground py-6 px-6 shadow-md">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex flex-col">
-            <h1 className="text-2xl font-bold tracking-tight" data-testid="text-title">CREACIONES</h1>
-            <p className="text-sm opacity-80">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
-          </div>
-          <ThemeToggle />
+      <header className="bg-card border-b border-border py-6 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-2xl font-bold tracking-tight text-foreground" data-testid="text-title">CREACIONES</h1>
+          <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        {/* Statistics Counters */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <StatsCard title="Total Expedientes" value={stats.total} icon={FileText} />
-          <StatsCard title="En Proceso" value={stats.enProceso} icon={Clock} iconColor="text-amber-600 dark:text-amber-400" />
-          <StatsCard title="Pendientes" value={stats.pendientes} icon={AlertCircle} iconColor="text-blue-600 dark:text-blue-400" />
-          <StatsCard title="Aprobados" value={stats.aprobados} icon={CheckCircle} iconColor="text-emerald-600 dark:text-emerald-400" />
+        {/* Estado Counters */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
+          {ESTADO_TYPES.map((estado) => (
+            <Card 
+              key={estado} 
+              className={`p-4 cursor-pointer transition-all hover-elevate ${estadoFilter === estado ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setEstadoFilter(estadoFilter === estado ? "all" : estado)}
+              data-testid={`counter-${estado}`}
+            >
+              <div className="text-center">
+                <span className="text-2xl font-bold text-foreground" data-testid={`stat-value-${estado}`}>
+                  {estadoStats[estado] || 0}
+                </span>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{estado}</p>
+              </div>
+            </Card>
+          ))}
         </div>
 
         {/* Action Bar */}
@@ -246,13 +252,13 @@ export default function Home() {
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
-                <TableRow className="bg-primary hover:bg-primary">
-                  <TableHead className="text-primary-foreground font-medium w-[120px]">Expediente</TableHead>
-                  <TableHead className="text-primary-foreground font-medium min-w-[280px]">Solicita</TableHead>
-                  <TableHead className="text-primary-foreground font-medium min-w-[200px]">Establecimiento</TableHead>
-                  <TableHead className="text-primary-foreground font-medium w-[140px]">Estado</TableHead>
-                  <TableHead className="text-primary-foreground font-medium">Comentario</TableHead>
-                  <TableHead className="text-primary-foreground font-medium w-[100px] text-right">Acciones</TableHead>
+                <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border">
+                  <TableHead className="text-foreground font-medium w-[120px]">Expediente</TableHead>
+                  <TableHead className="text-foreground font-medium min-w-[280px]">Solicita</TableHead>
+                  <TableHead className="text-foreground font-medium min-w-[200px]">Establecimiento</TableHead>
+                  <TableHead className="text-foreground font-medium w-[140px]">Estado</TableHead>
+                  <TableHead className="text-foreground font-medium">Comentario</TableHead>
+                  <TableHead className="text-foreground font-medium w-[100px] text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -277,7 +283,7 @@ export default function Home() {
                   paginatedExpedientes.map((exp, index) => (
                     <TableRow 
                       key={exp.id} 
-                      className={index % 2 === 0 ? "bg-background" : "bg-muted/30"}
+                      className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}
                       data-testid={`row-expediente-${exp.id}`}
                     >
                       <TableCell className="font-mono text-sm" data-testid={`text-expediente-${exp.id}`}>
@@ -356,7 +362,7 @@ export default function Home() {
 
           {/* Pagination */}
           {filteredExpedientes.length > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border">
               <p className="text-sm text-muted-foreground" data-testid="text-pagination-info">
                 Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, filteredExpedientes.length)} de {filteredExpedientes.length} registros
               </p>
@@ -413,7 +419,7 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-muted py-4 px-6 mt-auto">
+      <footer className="bg-card border-t border-border py-4 px-6 mt-auto">
         <div className="max-w-7xl mx-auto text-center">
           <p className="text-xs text-muted-foreground" data-testid="text-footer">
             Desarrollado por Dirección Gestión Educativa
