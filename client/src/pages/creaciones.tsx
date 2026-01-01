@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
+import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, Filter, Edit2, Trash2, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Plus, Search, Filter, Edit2, Trash2, ChevronLeft, ChevronRight, X, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -17,7 +18,8 @@ import { type Expediente, type InsertExpediente, SOLICITUD_TYPES, ESTADO_TYPES, 
 
 const ITEMS_PER_PAGE = 10;
 
-export default function Home() {
+export default function CreacionesHome() {
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
@@ -140,13 +142,31 @@ export default function Home() {
 
   const hasActiveFilters = estadoFilter !== "all" || solicitudFilter !== "all" || searchQuery !== "";
 
+  useEffect(() => {
+    const authModule = localStorage.getItem("authModule");
+    if (authModule !== "CREACIONES") {
+      setLocation("/");
+    }
+  }, [setLocation]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("authModule");
+    setLocation("/");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="bg-card border-b border-border py-6 px-6">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground" data-testid="text-title">CREACIONES</h1>
-          <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
+      <header className="bg-card border-b border-border py-4 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-title">CREACIONES</h1>
+            <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
+          </div>
+          <Button variant="ghost" size="sm" onClick={handleLogout} data-testid="button-logout">
+            <LogOut className="mr-2 h-4 w-4" />
+            Salir
+          </Button>
         </div>
       </header>
 

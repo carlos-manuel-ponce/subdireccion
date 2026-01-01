@@ -1,0 +1,155 @@
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { Lock, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { MODULE_TYPES, type ModuleType } from "@shared/schema";
+
+export default function Login() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [selectedModule, setSelectedModule] = useState<ModuleType | null>(null);
+  const [pin, setPin] = useState("");
+
+  const loginMutation = useMutation({
+    mutationFn: async ({ module, pin }: { module: ModuleType; pin: string }) => {
+      const response = await apiRequest("POST", "/api/auth/login", { module, pin });
+      return response.json();
+    },
+    onSuccess: (data) => {
+      localStorage.setItem("authModule", data.module);
+      if (data.module === "CREACIONES") {
+        setLocation("/creaciones");
+      } else {
+        setLocation("/cobertura");
+      }
+    },
+    onError: () => {
+      toast({
+        title: "PIN Incorrecto",
+        description: "El PIN ingresado no es válido. Intente nuevamente.",
+        variant: "destructive",
+      });
+      setPin("");
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (selectedModule && pin.length === 4) {
+      loginMutation.mutate({ module: selectedModule, pin });
+    }
+  };
+
+  const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, "").slice(0, 4);
+    setPin(value);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background">
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-foreground" data-testid="text-login-title">
+              SUBDIRECCIÓN COBERTURA DE CARGOS
+            </h1>
+            <p className="mt-2 text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <Card
+              className={`p-6 cursor-pointer transition-all hover-elevate ${
+                selectedModule === "CREACIONES" ? "ring-2 ring-primary" : ""
+              }`}
+              onClick={() => setSelectedModule("CREACIONES")}
+              data-testid="card-module-creaciones"
+            >
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-md bg-muted flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-foreground">CREACIONES</h3>
+                <p className="text-xs text-muted-foreground mt-1">Gestión de expedientes</p>
+              </div>
+            </Card>
+
+            <Card
+              className={`p-6 cursor-pointer transition-all hover-elevate ${
+                selectedModule === "COBERTURA" ? "ring-2 ring-primary" : ""
+              }`}
+              onClick={() => setSelectedModule("COBERTURA")}
+              data-testid="card-module-cobertura"
+            >
+              <div className="text-center">
+                <div className="w-12 h-12 mx-auto mb-3 rounded-md bg-muted flex items-center justify-center">
+                  <Lock className="w-6 h-6 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-foreground">COBERTURA DE CARGOS</h3>
+                <p className="text-xs text-muted-foreground mt-1">Registro y estadísticas</p>
+              </div>
+            </Card>
+          </div>
+
+          {selectedModule && (
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <Card className="p-6">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Ingrese el PIN para <span className="font-semibold text-foreground">{selectedModule === "CREACIONES" ? "CREACIONES" : "COBERTURA DE CARGOS"}</span>
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pin">PIN de acceso</Label>
+                    <Input
+                      id="pin"
+                      type="password"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={4}
+                      value={pin}
+                      onChange={handlePinChange}
+                      placeholder="****"
+                      className="text-center text-2xl tracking-widest"
+                      autoFocus
+                      data-testid="input-pin"
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={pin.length !== 4 || loginMutation.isPending}
+                    data-testid="button-login"
+                  >
+                    {loginMutation.isPending ? (
+                      "Verificando..."
+                    ) : (
+                      <>
+                        Ingresar
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </Card>
+            </form>
+          )}
+        </div>
+      </div>
+
+      <footer className="bg-card border-t border-border py-4 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-xs text-muted-foreground">
+            Desarrollado por Dirección Gestión Educativa
+          </p>
+        </div>
+      </footer>
+    </div>
+  );
+}

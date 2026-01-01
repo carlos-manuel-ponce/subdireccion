@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { createServer, type Server } from "http";
+import type { Server } from "http";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
@@ -15,7 +15,6 @@ import {
 } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
-// Configure multer for file uploads
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
@@ -45,17 +44,16 @@ const upload = multer({
     }
   },
   limits: {
-    fileSize: 10 * 1024 * 1024, // 10MB limit
+    fileSize: 10 * 1024 * 1024,
   },
 });
 
-// PIN credentials
 const PIN_CREDENTIALS: Record<string, string> = {
   CREACIONES: "1111",
   COBERTURA: "1212",
 };
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(server: Server, app: Express): Promise<void> {
   // ==================== AUTH ====================
   app.post("/api/auth/login", async (req, res) => {
     try {
@@ -356,7 +354,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ error: "Error al generar el informe" });
     }
   });
-
-  const httpServer = createServer(app);
-  return httpServer;
 }
