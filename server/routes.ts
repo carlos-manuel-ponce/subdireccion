@@ -12,6 +12,7 @@ import {
   insertCoberturaDetalleSchema,
   loginSchema,
   type CoberturaDetalle,
+  type TitularizacionRegistro,
 } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
@@ -51,6 +52,7 @@ const upload = multer({
 const PIN_CREDENTIALS: Record<string, string> = {
   CREACIONES: "1111",
   COBERTURA: "1212",
+  TITULARIZACIONES: "1313",
 };
 
 export async function registerRoutes(server: Server, app: Express): Promise<void> {
@@ -336,6 +338,73 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
             .text(`   Descripción: ${detalle.descripcion}`)
             .text(`   Docente: ${detalle.apellido}, ${detalle.nombre} - DNI: ${detalle.dni}`)
             .text(`   Habilitación: ${detalle.habilitacion}`);
+
+          doc.moveDown(0.5);
+          doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+          doc.moveDown(0.5);
+        });
+      } else {
+        doc.text("No se encontraron registros para los filtros aplicados.");
+      }
+
+      // Footer
+      doc.moveDown(2);
+      doc.fontSize(8).text("Subdirección Cobertura de Cargos - Dirección Gestión Educativa", { align: "center" });
+
+      doc.end();
+    } catch (error) {
+      res.status(500).json({ error: "Error al generar el informe" });
+    }
+  });
+
+  // ==================== TITULARIZACIONES ====================
+  app.get("/api/titularizaciones/estadisticas", async (_req, res) => {
+    const estadisticas = await storage.getTitularizacionEstadisticas();
+    res.json(estadisticas);
+  });
+
+  app.get("/api/titularizaciones/registros", async (_req, res) => {
+    const registros = await storage.getTitularizacionRegistros();
+    res.json(registros);
+  });
+
+  app.post("/api/titularizaciones/registros/report", async (req, res) => {
+    try {
+      const { registros } = req.body as { registros: TitularizacionRegistro[] };
+
+      const doc = new PDFDocument({ margin: 50 });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename=informe-titularizaciones-${Date.now()}.pdf`);
+
+      doc.pipe(res);
+
+      // Header
+      doc.fontSize(18).text("INFORME DE TITULARIZACIONES", { align: "center" });
+      doc.moveDown();
+      doc.fontSize(12).text(`Fecha de generación: ${new Date().toLocaleDateString("es-AR")}`, { align: "center" });
+      doc.moveDown();
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+      doc.moveDown();
+
+      // Data table
+      if (registros && registros.length > 0) {
+        doc.fontSize(12).text(`Total de registros: ${registros.length}`, { align: "left" });
+        doc.moveDown();
+
+        registros.forEach((reg, index) => {
+          if (doc.y > 700) {
+            doc.addPage();
+          }
+
+          doc.fontSize(10)
+            .text(`${index + 1}. Expediente: ${reg.expediente}`, { continued: false })
+            .text(`   Docente: ${reg.apellido}, ${reg.nombre} - DNI: ${reg.dni}`)
+            .text(`   Establecimiento: ${reg.establecimiento}`)
+            .text(`   Localidad: ${reg.localidad} | Departamento: ${reg.departamento}`)
+            .text(`   Junta de Clasificación: ${reg.juntaClasificacion}`)
+            .text(`   Titularizar en: ${reg.titularizarEn}`)
+            .text(`   Renuncia a: ${reg.renunciaA || "N/A"}`);
 
           doc.moveDown(0.5);
           doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();

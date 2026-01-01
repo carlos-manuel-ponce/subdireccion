@@ -79,8 +79,24 @@ export const JUNTA_TYPES = ["INICIAL Y PRIMARIA", "SECUNDARIA"] as const;
 export type JuntaType = (typeof JUNTA_TYPES)[number];
 
 // Nomenclador de Módulos para Login
-export const MODULE_TYPES = ["CREACIONES", "COBERTURA"] as const;
+export const MODULE_TYPES = ["CREACIONES", "COBERTURA", "TITULARIZACIONES"] as const;
 export type ModuleType = (typeof MODULE_TYPES)[number];
+
+// Nomenclador de Tipos de Titularización
+export const TITULARIZACION_TYPES = [
+  "ASESOR PEDAGÓGICO",
+  "HORAS",
+  "CARGOS",
+  "MAESTRA DE NIVEL INICIAL",
+  "MAESTRA DE NIVEL INICIAL CON RENUNCIA",
+  "SECRETARIO",
+  "SECRETARIO CON RENUNCIA",
+  "DIRECTOR DE PERSONAL ÚNICO",
+  "DIRECTOR DE PERSONAL ÚNICO CON RENUNCIA",
+  "DIRECTOR DE 3RA. CATEGORÍA",
+  "DIRECTOR DE 3RA. CATEGORÍA CON RENUNCIA",
+] as const;
+export type TitularizacionType = (typeof TITULARIZACION_TYPES)[number];
 
 // ==================== TABLAS ====================
 
@@ -158,6 +174,39 @@ export type CoberturaEvento = typeof coberturaEventos.$inferSelect;
 export const insertCoberturaDetalleSchema = createInsertSchema(coberturaDetalles).omit({ id: true });
 export type InsertCoberturaDetalle = z.infer<typeof insertCoberturaDetalleSchema>;
 export type CoberturaDetalle = typeof coberturaDetalles.$inferSelect;
+
+// Tabla de Estadísticas de Titularizaciones
+export const titularizacionEstadisticas = pgTable("titularizacion_estadisticas", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  tipo: text("tipo").notNull(),
+  juntaClasificacion: text("junta_clasificacion").notNull(),
+  cantidad: integer("cantidad").notNull().default(0),
+});
+
+// Tabla de Registros de Titularizaciones (para buscador)
+export const titularizacionRegistros = pgTable("titularizacion_registros", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  expediente: text("expediente").notNull(),
+  nombre: text("nombre").notNull(),
+  apellido: text("apellido").notNull(),
+  dni: text("dni").notNull(),
+  establecimiento: text("establecimiento").notNull(),
+  localidad: text("localidad").notNull(),
+  departamento: text("departamento").notNull(),
+  juntaClasificacion: text("junta_clasificacion").notNull(),
+  renunciaA: text("renuncia_a"),
+  titularizarEn: text("titularizar_en").notNull(),
+});
+
+// Titularización Estadísticas
+export const insertTitularizacionEstadisticaSchema = createInsertSchema(titularizacionEstadisticas).omit({ id: true });
+export type InsertTitularizacionEstadistica = z.infer<typeof insertTitularizacionEstadisticaSchema>;
+export type TitularizacionEstadistica = typeof titularizacionEstadisticas.$inferSelect;
+
+// Titularización Registros
+export const insertTitularizacionRegistroSchema = createInsertSchema(titularizacionRegistros).omit({ id: true });
+export type InsertTitularizacionRegistro = z.infer<typeof insertTitularizacionRegistroSchema>;
+export type TitularizacionRegistro = typeof titularizacionRegistros.$inferSelect;
 
 // Login Schema
 export const loginSchema = z.object({

@@ -7,6 +7,12 @@ import {
   type InsertCoberturaEvento,
   type CoberturaDetalle,
   type InsertCoberturaDetalle,
+  type TitularizacionEstadistica,
+  type InsertTitularizacionEstadistica,
+  type TitularizacionRegistro,
+  type InsertTitularizacionRegistro,
+  TITULARIZACION_TYPES,
+  JUNTA_TYPES,
 } from "@shared/schema";
 
 export interface IStorage {
@@ -33,6 +39,14 @@ export interface IStorage {
   createCoberturaDetalle(data: InsertCoberturaDetalle): Promise<CoberturaDetalle>;
   updateCoberturaDetalle(id: string, data: InsertCoberturaDetalle): Promise<CoberturaDetalle | undefined>;
   deleteCoberturaDetalle(id: string): Promise<boolean>;
+
+  getTitularizacionEstadisticas(): Promise<TitularizacionEstadistica[]>;
+  getTitularizacionEstadistica(id: string): Promise<TitularizacionEstadistica | undefined>;
+  createTitularizacionEstadistica(data: InsertTitularizacionEstadistica): Promise<TitularizacionEstadistica>;
+
+  getTitularizacionRegistros(): Promise<TitularizacionRegistro[]>;
+  getTitularizacionRegistro(id: string): Promise<TitularizacionRegistro | undefined>;
+  createTitularizacionRegistro(data: InsertTitularizacionRegistro): Promise<TitularizacionRegistro>;
 }
 
 export class MemStorage implements IStorage {
@@ -40,6 +54,8 @@ export class MemStorage implements IStorage {
   private coberturaRegistros: Map<string, CoberturaRegistro> = new Map();
   private coberturaEventos: Map<string, CoberturaEvento> = new Map();
   private coberturaDetalles: Map<string, CoberturaDetalle> = new Map();
+  private titularizacionEstadisticas: Map<string, TitularizacionEstadistica> = new Map();
+  private titularizacionRegistros: Map<string, TitularizacionRegistro> = new Map();
 
   constructor() {
     this.seedData();
@@ -100,6 +116,31 @@ export class MemStorage implements IStorage {
 
     sampleDetalles.forEach((det) => {
       this.coberturaDetalles.set(det.id, det);
+    });
+
+    // Seed Titularizaciones Estadísticas
+    JUNTA_TYPES.forEach((junta) => {
+      TITULARIZACION_TYPES.forEach((tipo) => {
+        const id = crypto.randomUUID();
+        const cantidad = Math.floor(Math.random() * 50) + 5;
+        this.titularizacionEstadisticas.set(id, { id, tipo, juntaClasificacion: junta, cantidad });
+      });
+    });
+
+    // Seed Titularizaciones Registros
+    const sampleTitularizaciones: TitularizacionRegistro[] = [
+      { id: crypto.randomUUID(), expediente: "TIT-001/26", nombre: "MARÍA", apellido: "PÉREZ", dni: "28123456", establecimiento: "Escuela N° 100", localidad: "Capital", departamento: "Capital", juntaClasificacion: "INICIAL Y PRIMARIA", renunciaA: null, titularizarEn: "MAESTRA DE NIVEL INICIAL" },
+      { id: crypto.randomUUID(), expediente: "TIT-002/26", nombre: "JUAN", apellido: "GARCÍA", dni: "29234567", establecimiento: "Colegio N° 200", localidad: "Zona Norte", departamento: "Norte", juntaClasificacion: "SECUNDARIA", renunciaA: "HORAS", titularizarEn: "ASESOR PEDAGÓGICO" },
+      { id: crypto.randomUUID(), expediente: "TIT-003/26", nombre: "ANA", apellido: "LÓPEZ", dni: "30345678", establecimiento: "Jardín N° 50", localidad: "Zona Sur", departamento: "Sur", juntaClasificacion: "INICIAL Y PRIMARIA", renunciaA: null, titularizarEn: "DIRECTOR DE PERSONAL ÚNICO" },
+      { id: crypto.randomUUID(), expediente: "TIT-004/26", nombre: "CARLOS", apellido: "MARTÍNEZ", dni: "27456789", establecimiento: "Instituto N° 300", localidad: "Zona Este", departamento: "Este", juntaClasificacion: "SECUNDARIA", renunciaA: "CARGOS", titularizarEn: "SECRETARIO" },
+      { id: crypto.randomUUID(), expediente: "TIT-005/26", nombre: "LAURA", apellido: "FERNÁNDEZ", dni: "31567890", establecimiento: "Escuela N° 150", localidad: "Zona Oeste", departamento: "Oeste", juntaClasificacion: "INICIAL Y PRIMARIA", renunciaA: null, titularizarEn: "DIRECTOR DE 3RA. CATEGORÍA" },
+      { id: crypto.randomUUID(), expediente: "TIT-006/26", nombre: "PEDRO", apellido: "RODRÍGUEZ", dni: "26678901", establecimiento: "Colegio Técnico N° 5", localidad: "Capital", departamento: "Capital", juntaClasificacion: "SECUNDARIA", renunciaA: null, titularizarEn: "HORAS" },
+      { id: crypto.randomUUID(), expediente: "TIT-007/26", nombre: "SOFÍA", apellido: "GONZÁLEZ", dni: "32789012", establecimiento: "Escuela Rural N° 25", localidad: "Interior", departamento: "Interior", juntaClasificacion: "INICIAL Y PRIMARIA", renunciaA: "MAESTRA DE NIVEL INICIAL", titularizarEn: "SECRETARIO CON RENUNCIA" },
+      { id: crypto.randomUUID(), expediente: "TIT-008/26", nombre: "DIEGO", apellido: "SÁNCHEZ", dni: "25890123", establecimiento: "Instituto Provincial N° 10", localidad: "Zona Norte", departamento: "Norte", juntaClasificacion: "SECUNDARIA", renunciaA: null, titularizarEn: "CARGOS" },
+    ];
+
+    sampleTitularizaciones.forEach((tit) => {
+      this.titularizacionRegistros.set(tit.id, tit);
     });
   }
 
@@ -209,6 +250,36 @@ export class MemStorage implements IStorage {
 
   async deleteCoberturaDetalle(id: string): Promise<boolean> {
     return this.coberturaDetalles.delete(id);
+  }
+
+  async getTitularizacionEstadisticas(): Promise<TitularizacionEstadistica[]> {
+    return Array.from(this.titularizacionEstadisticas.values());
+  }
+
+  async getTitularizacionEstadistica(id: string): Promise<TitularizacionEstadistica | undefined> {
+    return this.titularizacionEstadisticas.get(id);
+  }
+
+  async createTitularizacionEstadistica(data: InsertTitularizacionEstadistica): Promise<TitularizacionEstadistica> {
+    const id = crypto.randomUUID();
+    const estadistica: TitularizacionEstadistica = { id, tipo: data.tipo, juntaClasificacion: data.juntaClasificacion, cantidad: data.cantidad ?? 0 };
+    this.titularizacionEstadisticas.set(id, estadistica);
+    return estadistica;
+  }
+
+  async getTitularizacionRegistros(): Promise<TitularizacionRegistro[]> {
+    return Array.from(this.titularizacionRegistros.values());
+  }
+
+  async getTitularizacionRegistro(id: string): Promise<TitularizacionRegistro | undefined> {
+    return this.titularizacionRegistros.get(id);
+  }
+
+  async createTitularizacionRegistro(data: InsertTitularizacionRegistro): Promise<TitularizacionRegistro> {
+    const id = crypto.randomUUID();
+    const registro: TitularizacionRegistro = { id, ...data, renunciaA: data.renunciaA ?? null };
+    this.titularizacionRegistros.set(id, registro);
+    return registro;
   }
 }
 

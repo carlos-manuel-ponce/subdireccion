@@ -25,8 +25,10 @@ export default function Login() {
       localStorage.setItem("authModule", data.module);
       if (data.module === "CREACIONES") {
         setLocation("/creaciones");
-      } else {
+      } else if (data.module === "COBERTURA") {
         setLocation("/cobertura");
+      } else {
+        setLocation("/titularizaciones");
       }
     },
     onError: () => {
@@ -62,36 +64,52 @@ export default function Login() {
             <p className="mt-2 text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <Card
-              className={`p-6 cursor-pointer transition-all hover-elevate ${
+              className={`p-4 cursor-pointer transition-all hover-elevate ${
                 selectedModule === "CREACIONES" ? "ring-2 ring-primary" : ""
               }`}
               onClick={() => setSelectedModule("CREACIONES")}
               data-testid="card-module-creaciones"
             >
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-md bg-muted flex items-center justify-center">
-                  <Lock className="w-6 h-6 text-muted-foreground" />
+                <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-muted flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <h3 className="font-semibold text-foreground">CREACIONES</h3>
-                <p className="text-xs text-muted-foreground mt-1">Gestión de expedientes</p>
+                <h3 className="font-semibold text-foreground text-sm">CREACIONES</h3>
+                <p className="text-xs text-muted-foreground mt-1">Expedientes</p>
               </div>
             </Card>
 
             <Card
-              className={`p-6 cursor-pointer transition-all hover-elevate ${
+              className={`p-4 cursor-pointer transition-all hover-elevate ${
                 selectedModule === "COBERTURA" ? "ring-2 ring-primary" : ""
               }`}
               onClick={() => setSelectedModule("COBERTURA")}
               data-testid="card-module-cobertura"
             >
               <div className="text-center">
-                <div className="w-12 h-12 mx-auto mb-3 rounded-md bg-muted flex items-center justify-center">
-                  <Lock className="w-6 h-6 text-muted-foreground" />
+                <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-muted flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-muted-foreground" />
                 </div>
-                <h3 className="font-semibold text-foreground">COBERTURA DE CARGOS</h3>
-                <p className="text-xs text-muted-foreground mt-1">Registro y estadísticas</p>
+                <h3 className="font-semibold text-foreground text-sm">COBERTURA</h3>
+                <p className="text-xs text-muted-foreground mt-1">Registro</p>
+              </div>
+            </Card>
+
+            <Card
+              className={`p-4 cursor-pointer transition-all hover-elevate ${
+                selectedModule === "TITULARIZACIONES" ? "ring-2 ring-primary" : ""
+              }`}
+              onClick={() => setSelectedModule("TITULARIZACIONES")}
+              data-testid="card-module-titularizaciones"
+            >
+              <div className="text-center">
+                <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-muted flex items-center justify-center">
+                  <Lock className="w-5 h-5 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold text-foreground text-sm">TITULARIZACIONES</h3>
+                <p className="text-xs text-muted-foreground mt-1">Estadísticas</p>
               </div>
             </Card>
           </div>
@@ -102,7 +120,7 @@ export default function Login() {
                 <div className="space-y-4">
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">
-                      Ingrese el PIN para <span className="font-semibold text-foreground">{selectedModule === "CREACIONES" ? "CREACIONES" : "COBERTURA DE CARGOS"}</span>
+                      Ingrese el PIN para <span className="font-semibold text-foreground">{selectedModule}</span>
                     </p>
                   </div>
                   <div className="space-y-2">
