@@ -1,13 +1,16 @@
 # Creaciones - Subdirección Cobertura de Cargos
 
 ## Overview
-This is a management platform for educational institution records (expedientes). It allows users to create, read, update, and delete expedientes for the "Subdirección Cobertura de Cargos" department.
+This is a tri-module management platform for educational institution records with PIN-based authentication. The platform has permanent dark gray mode and includes:
+1. **CREACIONES** (PIN: 1111) - Educational records (expedientes) management with 12 estado-specific counters, CRUD operations, search, and filters
+2. **COBERTURA DE CARGOS** (PIN: 1212) - Registration and statistics system with file uploads, interactive charts, and PDF reports
+3. **TITULARIZACIONES** (PIN: 1313) - Statistics dashboard with bar charts for 11 titularization types and searchable records table with PDF export
 
 ## Recent Changes
 - 2026-01-01: Initial implementation of the platform with full CRUD functionality
-- 2026-01-01: Added institutional design with dark blue, gray, and white color scheme
-- 2026-01-01: Implemented dark/light mode toggle
-- 2026-01-01: Added filters, search, and pagination functionality
+- 2026-01-01: Added institutional design with permanent dark gray color scheme
+- 2026-01-01: Implemented tri-module PIN authentication system
+- 2026-01-01: Added TITULARIZACIONES module with horizontal bar charts and PDF generation
 
 ## Project Architecture
 
@@ -38,13 +41,35 @@ This is a management platform for educational institution records (expedientes).
 
 ## Data Models
 
-### Expediente
+### Expediente (CREACIONES module)
 - `id`: UUID (auto-generated)
 - `expediente`: String (format: 1234567/26)
 - `solicita`: SolicitudType (25 types)
 - `establecimiento`: String
 - `estado`: EstadoType (12 states)
 - `comentario`: String (optional)
+
+### TitularizacionEstadistica (TITULARIZACIONES module)
+- `id`: UUID
+- `tipo`: TitularizacionType (11 types)
+- `juntaClasificacion`: JuntaType
+- `cantidad`: Number
+
+### TitularizacionRegistro (TITULARIZACIONES module)
+- `id`: UUID
+- `expediente`: String
+- `nombre`, `apellido`, `dni`: String
+- `establecimiento`, `localidad`, `departamento`: String
+- `juntaClasificacion`: JuntaType
+- `titularizarEn`: TitularizacionType
+- `renunciaA`: String (nullable)
+
+### Nomenclador de Tipos de Titularización (11 types)
+- ASESOR PEDAGÓGICO, HORAS, CARGOS
+- MAESTRA DE NIVEL INICIAL, MAESTRA DE NIVEL INICIAL CON RENUNCIA
+- SECRETARIO, SECRETARIO CON RENUNCIA
+- DIRECTOR DE PERSONAL ÚNICO, DIRECTOR DE PERSONAL ÚNICO CON RENUNCIA
+- DIRECTOR DE 3RA. CATEGORÍA, DIRECTOR DE 3RA. CATEGORÍA CON RENUNCIA
 
 ### Nomenclador de Solicitud (25 types)
 - CIERRE PROVISORIO DE ESTABLECIMIENTO
@@ -58,11 +83,17 @@ This is a management platform for educational institution records (expedientes).
 - GESTIÓN, HACIENDA, FIRMA MINISTRO, FIRMA INT.
 
 ## API Endpoints
+### Expedientes (CREACIONES)
 - `GET /api/expedientes` - List all expedientes
 - `GET /api/expedientes/:id` - Get single expediente
 - `POST /api/expedientes` - Create new expediente
 - `PUT /api/expedientes/:id` - Update expediente
 - `DELETE /api/expedientes/:id` - Delete expediente
+
+### Titularizaciones
+- `GET /api/titularizaciones/estadisticas` - Get statistics by type
+- `GET /api/titularizaciones/registros` - Get all records
+- `POST /api/titularizaciones/registros/report` - Generate PDF report
 
 ## Running the Project
 The application runs with `npm run dev` which starts:
