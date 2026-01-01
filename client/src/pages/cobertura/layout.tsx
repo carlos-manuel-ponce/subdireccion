@@ -44,22 +44,20 @@ export default function CoberturaLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <header className="bg-card border-b border-border py-4 px-6">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="max-w-7xl mx-auto relative">
+          <div className="flex flex-col items-center text-center">
             <img 
               src={logoUrl} 
               alt="Gobierno de la Provincia - Ministerio de Educación" 
-              className="h-10"
+              className="h-10 mb-2"
               data-testid="img-logo"
             />
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-cobertura-title">
-                COBERTURA DE CARGOS
-              </h1>
-              <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
-            </div>
+            <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-cobertura-title">
+              COBERTURA DE CARGOS
+            </h1>
+            <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} data-testid="button-logout">
+          <Button variant="ghost" size="sm" onClick={handleLogout} className="absolute right-0 top-1/2 -translate-y-1/2" data-testid="button-logout">
             <LogOut className="mr-2 h-4 w-4" />
             Salir
           </Button>
