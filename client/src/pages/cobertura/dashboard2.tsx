@@ -1,34 +1,62 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Search, FileDown, X } from "lucide-react";
+import { Search, FileDown, X, Building2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { type CoberturaDetalle } from "@shared/schema";
 
 export default function Dashboard2Page() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedEstablecimientos, setSelectedEstablecimientos] = useState<string[]>([]);
 
   const { data: detalles = [], isLoading } = useQuery<CoberturaDetalle[]>({
     queryKey: ["/api/cobertura/detalles"],
   });
 
-  const filteredDetalles = useMemo(() => {
-    if (!searchQuery.trim()) return detalles;
-    const query = searchQuery.toLowerCase();
-    return detalles.filter((det) =>
-      det.establecimiento.toLowerCase().includes(query) ||
-      det.localidad.toLowerCase().includes(query) ||
-      det.apellido.toLowerCase().includes(query) ||
-      det.nombre.toLowerCase().includes(query) ||
-      det.dni.includes(query)
+  const uniqueEstablecimientos = useMemo(() => {
+    const establecimientos = [...new Set(detalles.map((det) => det.establecimiento))];
+    return establecimientos.sort();
+  }, [detalles]);
+
+  const toggleEstablecimiento = (est: string) => {
+    setSelectedEstablecimientos((prev) =>
+      prev.includes(est) ? prev.filter((e) => e !== est) : [...prev, est]
     );
-  }, [detalles, searchQuery]);
+  };
+
+  const clearEstablecimientos = () => {
+    setSelectedEstablecimientos([]);
+  };
+
+  const filteredDetalles = useMemo(() => {
+    let filtered = detalles;
+    
+    if (selectedEstablecimientos.length > 0) {
+      filtered = filtered.filter((det) => selectedEstablecimientos.includes(det.establecimiento));
+    }
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((det) =>
+        det.establecimiento.toLowerCase().includes(query) ||
+        det.localidad.toLowerCase().includes(query) ||
+        det.apellido.toLowerCase().includes(query) ||
+        det.nombre.toLowerCase().includes(query) ||
+        det.dni.includes(query)
+      );
+    }
+    
+    return filtered;
+  }, [detalles, searchQuery, selectedEstablecimientos]);
 
   const generateReportMutation = useMutation({
     mutationFn: async () => {
@@ -89,37 +117,97 @@ export default function Dashboard2Page() {
 
       {/* Search and Actions */}
       <Card className="p-4">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Buscar por establecimiento, localidad, docente o DNI..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-              data-testid="input-search-detalles"
-            />
-          </div>
-          {searchQuery && (
-            <Button variant="ghost" size="icon" onClick={() => setSearchQuery("")}>
-              <X className="h-4 w-4" />
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Buscar por localidad, docente o DNI..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+                data-testid="input-search-detalles"
+              />
+            </div>
+            {searchQuery && (
+              <Button variant="ghost" size="icon" onClick={() => setSearchQuery("")}>
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" data-testid="button-filter-establecimientos">
+                  <Building2 className="mr-2 h-4 w-4" />
+                  Establecimientos
+                  {selectedEstablecimientos.length > 0 && (
+                    <Badge variant="secondary" className="ml-2">
+                      {selectedEstablecimientos.length}
+                    </Badge>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0" align="end">
+                <div className="p-3 border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Filtrar por establecimiento</span>
+                    {selectedEstablecimientos.length > 0 && (
+                      <Button variant="ghost" size="sm" onClick={clearEstablecimientos}>
+                        Limpiar
+                      </Button>
+                    )}
+                  </div>
+                </div>
+                <ScrollArea className="h-64">
+                  <div className="p-2 space-y-1">
+                    {uniqueEstablecimientos.map((est) => (
+                      <div
+                        key={est}
+                        className="flex items-center gap-2 p-2 rounded-md hover-elevate cursor-pointer"
+                        onClick={() => toggleEstablecimiento(est)}
+                        data-testid={`checkbox-est-${est}`}
+                      >
+                        <Checkbox
+                          checked={selectedEstablecimientos.includes(est)}
+                          onCheckedChange={() => toggleEstablecimiento(est)}
+                        />
+                        <span className="text-sm">{est}</span>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </PopoverContent>
+            </Popover>
+            <Button
+              onClick={handleGenerateReport}
+              disabled={generateReportMutation.isPending || filteredDetalles.length === 0}
+              data-testid="button-generate-report"
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              {generateReportMutation.isPending ? "Generando..." : "Generar Informe"}
             </Button>
+          </div>
+          
+          {selectedEstablecimientos.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {selectedEstablecimientos.map((est) => (
+                <Badge
+                  key={est}
+                  variant="secondary"
+                  className="cursor-pointer"
+                  onClick={() => toggleEstablecimiento(est)}
+                >
+                  {est}
+                  <X className="ml-1 h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
           )}
-          <Button
-            onClick={handleGenerateReport}
-            disabled={generateReportMutation.isPending || filteredDetalles.length === 0}
-            data-testid="button-generate-report"
-          >
-            <FileDown className="mr-2 h-4 w-4" />
-            {generateReportMutation.isPending ? "Generando..." : "Generar Informe"}
-          </Button>
-        </div>
-        {searchQuery && (
-          <p className="text-sm text-muted-foreground mt-3">
+          
+          <p className="text-sm text-muted-foreground">
             {filteredDetalles.length} resultado(s) encontrado(s)
           </p>
-        )}
+        </div>
       </Card>
 
       {/* Results Table */}
