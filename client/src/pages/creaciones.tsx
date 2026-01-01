@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Plus, Search, Filter, Edit2, Trash2, ChevronLeft, ChevronRight, X, LogOut } from "lucide-react";
+import { Plus, Search, Filter, Edit2, Trash2, ChevronLeft, ChevronRight, X, LogOut, FileDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -75,6 +75,40 @@ export default function CreacionesHome() {
       toast({ title: "Error", description: "No se pudo eliminar el expediente.", variant: "destructive" });
     },
   });
+
+  const generateReportMutation = useMutation({
+    mutationFn: async () => {
+      const response = await fetch("/api/expedientes/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ expedientes: filteredExpedientes }),
+      });
+      if (!response.ok) throw new Error("Error al generar el informe");
+      return response.blob();
+    },
+    onSuccess: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `informe-creaciones-${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast({ title: "Informe generado", description: "El archivo PDF se ha descargado correctamente." });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "No se pudo generar el informe.", variant: "destructive" });
+    },
+  });
+
+  const handleGenerateReport = () => {
+    if (filteredExpedientes.length === 0) {
+      toast({ title: "Sin datos", description: "No hay expedientes para incluir en el informe.", variant: "destructive" });
+      return;
+    }
+    generateReportMutation.mutate();
+  };
 
   const filteredExpedientes = useMemo(() => {
     return expedientes.filter((exp) => {
@@ -204,10 +238,21 @@ export default function CreacionesHome() {
 
         {/* Action Bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <Button onClick={handleOpenCreate} data-testid="button-add-new">
-            <Plus className="mr-2 h-4 w-4" />
-            Agregar Nuevo
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button onClick={handleOpenCreate} data-testid="button-add-new">
+              <Plus className="mr-2 h-4 w-4" />
+              Agregar Nuevo
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleGenerateReport} 
+              disabled={generateReportMutation.isPending || filteredExpedientes.length === 0}
+              data-testid="button-generate-report"
+            >
+              <FileDown className="mr-2 h-4 w-4" />
+              {generateReportMutation.isPending ? "Generando..." : "Generar Informe"}
+            </Button>
+          </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             <div className="relative flex-1 sm:w-80">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -235,6 +280,11 @@ export default function CreacionesHome() {
             </Button>
           </div>
         </div>
+
+        {/* Results count */}
+        <p className="text-sm text-muted-foreground mb-4">
+          {filteredExpedientes.length} expediente(s) encontrado(s)
+        </p>
 
         {/* Filters Panel */}
         {showFilters && (

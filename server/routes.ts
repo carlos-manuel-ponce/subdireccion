@@ -120,6 +120,57 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     res.status(204).send();
   });
 
+  app.post("/api/expedientes/report", async (req, res) => {
+    try {
+      const { expedientes } = req.body as { expedientes: { expediente: string; solicita: string; establecimiento: string; estado: string; comentario: string }[] };
+
+      const doc = new PDFDocument({ margin: 50 });
+
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", `attachment; filename=informe-creaciones-${Date.now()}.pdf`);
+
+      doc.pipe(res);
+
+      doc.fontSize(18).text("INFORME DE CREACIONES", { align: "center" });
+      doc.moveDown();
+      doc.fontSize(12).text(`Fecha de generación: ${new Date().toLocaleDateString("es-AR")}`, { align: "center" });
+      doc.moveDown();
+      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+      doc.moveDown();
+
+      if (expedientes && expedientes.length > 0) {
+        doc.fontSize(12).text(`Total de expedientes: ${expedientes.length}`, { align: "left" });
+        doc.moveDown();
+
+        expedientes.forEach((exp, index) => {
+          if (doc.y > 700) {
+            doc.addPage();
+          }
+
+          doc.fontSize(10)
+            .text(`${index + 1}. Expediente: ${exp.expediente}`, { continued: false })
+            .text(`   Solicita: ${exp.solicita}`)
+            .text(`   Establecimiento: ${exp.establecimiento}`)
+            .text(`   Estado: ${exp.estado}`)
+            .text(`   Comentario: ${exp.comentario || "Sin comentario"}`);
+
+          doc.moveDown(0.5);
+          doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+          doc.moveDown(0.5);
+        });
+      } else {
+        doc.text("No se encontraron expedientes para los filtros aplicados.");
+      }
+
+      doc.moveDown(2);
+      doc.fontSize(8).text("Subdirección Cobertura de Cargos - Dirección Gestión Educativa", { align: "center" });
+
+      doc.end();
+    } catch (error) {
+      res.status(500).json({ error: "Error al generar el informe" });
+    }
+  });
+
   // ==================== COBERTURA REGISTROS ====================
   app.get("/api/cobertura/registros", async (_req, res) => {
     const registros = await storage.getCoberturaRegistros();
