@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { MODULE_TYPES, type ModuleType } from "@shared/schema";
+import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -57,11 +58,17 @@ export default function Login() {
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md space-y-8">
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-foreground" data-testid="text-login-title">
+          <div className="text-center space-y-4">
+            <img 
+              src={logoUrl} 
+              alt="Gobierno de la Provincia - Ministerio de Educación" 
+              className="h-12 mx-auto"
+              data-testid="img-logo"
+            />
+            <h1 className="text-2xl font-bold text-foreground" data-testid="text-login-title">
               SUBDIRECCIÓN COBERTURA DE CARGOS
             </h1>
-            <p className="mt-2 text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
+            <p className="text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
           </div>
 
           <div className="grid grid-cols-3 gap-4">

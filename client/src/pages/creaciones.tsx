@@ -15,6 +15,7 @@ import { DeleteDialog } from "@/components/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { type Expediente, type InsertExpediente, SOLICITUD_TYPES, ESTADO_TYPES, type EstadoType, type SolicitudType } from "@shared/schema";
+import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -159,9 +160,17 @@ export default function CreacionesHome() {
       {/* Header */}
       <header className="bg-card border-b border-border py-4 px-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-title">CREACIONES</h1>
-            <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
+          <div className="flex items-center gap-4">
+            <img 
+              src={logoUrl} 
+              alt="Gobierno de la Provincia - Ministerio de Educación" 
+              className="h-10"
+              data-testid="img-logo"
+            />
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-title">CREACIONES</h1>
+              <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
+            </div>
           </div>
           <Button variant="ghost" size="sm" onClick={handleLogout} data-testid="button-logout">
             <LogOut className="mr-2 h-4 w-4" />
