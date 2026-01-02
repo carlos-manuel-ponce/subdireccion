@@ -56,7 +56,6 @@ export interface IStorage {
 
 export class MemStorage implements IStorage {
   private coberturaRegistros: Map<string, CoberturaRegistro> = new Map();
-  private coberturaEventos: Map<string, CoberturaEvento> = new Map();
   private coberturaDetalles: Map<string, CoberturaDetalle> = new Map();
   private titularizacionEstadisticas: Map<string, TitularizacionEstadistica> = new Map();
   private titularizacionRegistros: Map<string, TitularizacionRegistro> = new Map();
@@ -66,7 +65,6 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
-
     const sampleRegistros: CoberturaRegistro[] = [
       { id: crypto.randomUUID(), region: "I", nivel: "INICIAL Y PRIMARIO", responsable: "YANINA VARGAS", expediente: "1001/26", pedidoFileName: null, pedidoFilePath: null },
       { id: crypto.randomUUID(), region: "II", nivel: "SECUNDARIO", responsable: "NOELIA VILLA", expediente: "1002/26", pedidoFileName: null, pedidoFilePath: null },
@@ -77,18 +75,6 @@ export class MemStorage implements IStorage {
 
     sampleRegistros.forEach((reg) => {
       this.coberturaRegistros.set(reg.id, reg);
-    });
-
-    const sampleEventos: CoberturaEvento[] = [
-      { id: crypto.randomUUID(), llamado: "Llamado 1/2026", juntaClasificacion: "INICIAL Y PRIMARIA", tipo: "SUPLENCIA", fecha: "2026-01-15", establecimientos: 25, coberturas: 18, postulantes: 45, promedio: 2.5 },
-      { id: crypto.randomUUID(), llamado: "Llamado 2/2026", juntaClasificacion: "SECUNDARIA", tipo: "INTERINATO", fecha: "2026-01-20", establecimientos: 32, coberturas: 28, postulantes: 67, promedio: 2.4 },
-      { id: crypto.randomUUID(), llamado: "Llamado 3/2026", juntaClasificacion: "INICIAL Y PRIMARIA", tipo: "TITULAR", fecha: "2026-02-01", establecimientos: 15, coberturas: 12, postulantes: 35, promedio: 2.9 },
-      { id: crypto.randomUUID(), llamado: "Llamado 4/2026", juntaClasificacion: "SECUNDARIA", tipo: "SUPLENCIA", fecha: "2026-02-10", establecimientos: 40, coberturas: 35, postulantes: 89, promedio: 2.5 },
-      { id: crypto.randomUUID(), llamado: "Llamado 5/2026", juntaClasificacion: "INICIAL Y PRIMARIA", tipo: "INTERINATO", fecha: "2026-02-15", establecimientos: 28, coberturas: 22, postulantes: 56, promedio: 2.5 },
-    ];
-
-    sampleEventos.forEach((evt) => {
-      this.coberturaEventos.set(evt.id, evt);
     });
 
     const sampleDetalles: CoberturaDetalle[] = [
@@ -254,30 +240,117 @@ export class MemStorage implements IStorage {
   }
 
   async getCoberturaEventos(): Promise<CoberturaEvento[]> {
-    return Array.from(this.coberturaEventos.values());
+    const { data, error } = await supabase.from("llamados_cobertura").select("*");
+    if (error) {
+      console.error("Error fetching cobertura eventos:", error);
+      return [];
+    }
+    return (data || []).map((row: any) => ({
+      id: String(row.id),
+      llamado: row.llamado || "",
+      juntaClasificacion: row["junta de clasificacion"] || "",
+      tipo: row.tipo || "",
+      fecha: row.fecha || "",
+      establecimientos: row.establecimiento || 0,
+      coberturas: row.vacantes || 0,
+      postulantes: row.postulantes || 0,
+      promedio: row.promedio || 0,
+    }));
   }
 
   async getCoberturaEvento(id: string): Promise<CoberturaEvento | undefined> {
-    return this.coberturaEventos.get(id);
+    const { data, error } = await supabase.from("llamados_cobertura").select("*").eq("id", parseInt(id)).single();
+    if (error) {
+      console.error("Error fetching cobertura evento:", error);
+      return undefined;
+    }
+    if (!data) return undefined;
+    return {
+      id: String(data.id),
+      llamado: data.llamado || "",
+      juntaClasificacion: data["junta de clasificacion"] || "",
+      tipo: data.tipo || "",
+      fecha: data.fecha || "",
+      establecimientos: data.establecimiento || 0,
+      coberturas: data.vacantes || 0,
+      postulantes: data.postulantes || 0,
+      promedio: data.promedio || 0,
+    };
   }
 
   async createCoberturaEvento(data: InsertCoberturaEvento): Promise<CoberturaEvento> {
-    const id = crypto.randomUUID();
-    const evento: CoberturaEvento = { id, llamado: data.llamado, juntaClasificacion: data.juntaClasificacion, tipo: data.tipo, fecha: data.fecha, establecimientos: data.establecimientos ?? 0, coberturas: data.coberturas ?? 0, postulantes: data.postulantes ?? 0, promedio: data.promedio ?? 0 };
-    this.coberturaEventos.set(id, evento);
-    return evento;
+    const { data: created, error } = await supabase
+      .from("llamados_cobertura")
+      .insert({
+        llamado: data.llamado,
+        "junta de clasificacion": data.juntaClasificacion,
+        tipo: data.tipo,
+        fecha: data.fecha,
+        establecimiento: data.establecimientos ?? 0,
+        vacantes: data.coberturas ?? 0,
+        postulantes: data.postulantes ?? 0,
+        promedio: data.promedio ?? 0,
+      })
+      .select()
+      .single();
+    if (error) {
+      console.error("Error creating cobertura evento:", error);
+      throw new Error("Failed to create cobertura evento");
+    }
+    return {
+      id: String(created.id),
+      llamado: created.llamado || "",
+      juntaClasificacion: created["junta de clasificacion"] || "",
+      tipo: created.tipo || "",
+      fecha: created.fecha || "",
+      establecimientos: created.establecimiento || 0,
+      coberturas: created.vacantes || 0,
+      postulantes: created.postulantes || 0,
+      promedio: created.promedio || 0,
+    };
   }
 
   async updateCoberturaEvento(id: string, data: InsertCoberturaEvento): Promise<CoberturaEvento | undefined> {
-    const existing = this.coberturaEventos.get(id);
-    if (!existing) return undefined;
-    const updated: CoberturaEvento = { id, llamado: data.llamado, juntaClasificacion: data.juntaClasificacion, tipo: data.tipo, fecha: data.fecha, establecimientos: data.establecimientos ?? 0, coberturas: data.coberturas ?? 0, postulantes: data.postulantes ?? 0, promedio: data.promedio ?? 0 };
-    this.coberturaEventos.set(id, updated);
-    return updated;
+    const { data: updated, error } = await supabase
+      .from("llamados_cobertura")
+      .update({
+        llamado: data.llamado,
+        "junta de clasificacion": data.juntaClasificacion,
+        tipo: data.tipo,
+        fecha: data.fecha,
+        establecimiento: data.establecimientos ?? 0,
+        vacantes: data.coberturas ?? 0,
+        postulantes: data.postulantes ?? 0,
+        promedio: data.promedio ?? 0,
+      })
+      .eq("id", parseInt(id))
+      .select()
+      .single();
+    if (error) {
+      console.error("Error updating cobertura evento:", error);
+      return undefined;
+    }
+    if (!updated) return undefined;
+    return {
+      id: String(updated.id),
+      llamado: updated.llamado || "",
+      juntaClasificacion: updated["junta de clasificacion"] || "",
+      tipo: updated.tipo || "",
+      fecha: updated.fecha || "",
+      establecimientos: updated.establecimiento || 0,
+      coberturas: updated.vacantes || 0,
+      postulantes: updated.postulantes || 0,
+      promedio: updated.promedio || 0,
+    };
   }
 
   async deleteCoberturaEvento(id: string): Promise<boolean> {
-    return this.coberturaEventos.delete(id);
+    const { error } = await supabase.from("llamados_cobertura").delete().eq("id", parseInt(id));
+    if (error) {
+      console.error("Error deleting cobertura evento:", error);
+      return false;
+    }
+    return true;
   }
 
   async getCoberturaDetalles(): Promise<CoberturaDetalle[]> {
