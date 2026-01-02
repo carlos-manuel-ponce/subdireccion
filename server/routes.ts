@@ -50,35 +50,44 @@ function createPDFFooter(doc: InstanceType<typeof PDFDocument>, userName: string
 function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: string; value: string }[], title: string) {
   const cardX = 50;
   const cardWidth = 495;
-  const padding = 8;
-  const lineHeight = 14;
+  const labelWidth = 150;
+  const rowHeight = 18;
+  const headerHeight = 22;
   
-  const cardHeight = padding * 2 + (fields.length + 1) * lineHeight + 5;
+  const cardHeight = headerHeight + fields.length * rowHeight + 2;
   
-  if (doc.y + cardHeight > 750) {
+  if (doc.y + cardHeight > 740) {
     doc.addPage();
   }
   
   const startY = doc.y;
   
-  doc.strokeColor("#999999").lineWidth(0.5);
+  doc.lineWidth(1).strokeColor("#000000");
   doc.rect(cardX, startY, cardWidth, cardHeight).stroke();
   
-  doc.fillColor("#f0f0f0").rect(cardX, startY, cardWidth, lineHeight + padding).fill();
+  doc.fillColor("#e0e0e0").rect(cardX, startY, cardWidth, headerHeight).fill();
+  doc.strokeColor("#000000").moveTo(cardX, startY + headerHeight).lineTo(cardX + cardWidth, startY + headerHeight).stroke();
   doc.fillColor("#000000");
   
-  doc.font("Times-Bold").fontSize(10).text(title, cardX + padding, startY + padding / 2 + 2, { width: cardWidth - padding * 2 });
+  doc.font("Times-Bold").fontSize(11).text(title, cardX + 8, startY + 5, { width: cardWidth - 16 });
   
-  let currentY = startY + lineHeight + padding + 5;
+  let currentY = startY + headerHeight;
   
-  fields.forEach((field) => {
-    doc.font("Times-Bold").fontSize(9).text(`${field.label}: `, cardX + padding, currentY, { continued: true });
-    doc.font("Times-Roman").fontSize(9).text(field.value);
-    currentY += lineHeight;
+  fields.forEach((field, index) => {
+    doc.moveTo(cardX, currentY).lineTo(cardX + cardWidth, currentY).stroke();
+    
+    doc.fillColor("#f5f5f5").rect(cardX, currentY, labelWidth, rowHeight).fill();
+    doc.fillColor("#000000");
+    
+    doc.moveTo(cardX + labelWidth, currentY).lineTo(cardX + labelWidth, currentY + rowHeight).stroke();
+    
+    doc.font("Times-Bold").fontSize(9).text(field.label, cardX + 6, currentY + 5, { width: labelWidth - 12 });
+    doc.font("Times-Roman").fontSize(9).text(field.value, cardX + labelWidth + 6, currentY + 5, { width: cardWidth - labelWidth - 12 });
+    
+    currentY += rowHeight;
   });
   
-  doc.y = startY + cardHeight + 8;
-  doc.strokeColor("#000000");
+  doc.y = startY + cardHeight + 10;
 }
 
 const multerStorage = multer.diskStorage({
