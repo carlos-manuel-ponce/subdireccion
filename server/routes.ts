@@ -40,12 +40,12 @@ function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string) {
 function createPDFFooter(doc: InstanceType<typeof PDFDocument>, userName: string = "Usuario del Sistema") {
   const now = new Date();
   const dateStr = now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "2-digit" });
-  const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
   
   doc.moveDown(2);
-  doc.font("Times-Roman").fontSize(9).text("Documento generado automáticamente por Subdirección Cobertura de Cargos", { align: "center" });
-  doc.font("Times-Roman").fontSize(9).text(`Emisión: ${dateStr}, ${timeStr}`, { align: "center" });
-  doc.font("Times-Roman").fontSize(9).text(`Usuario: ${userName}`, { align: "center" });
+  doc.font("Times-Roman").fontSize(9).text("Documento generado automáticamente por Subdirección Cobertura de Cargos", 50, doc.y, { align: "center", width: 495 });
+  doc.font("Times-Roman").fontSize(9).text(`Emisión: ${dateStr}, ${timeStr}`, 50, doc.y, { align: "center", width: 495 });
+  doc.font("Times-Roman").fontSize(9).text(`Usuario: ${userName}`, 50, doc.y, { align: "center", width: 495 });
 }
 
 function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: string; value: string }[], title: string) {
