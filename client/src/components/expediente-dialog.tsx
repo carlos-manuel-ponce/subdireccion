@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { insertExpedienteSchema, SOLICITUD_TYPES, ESTADO_TYPES, type InsertExpediente, type Expediente } from "@shared/schema";
+import { insertExpedienteSchema, SOLICITUD_TYPES, UBICACION_TYPES, type InsertExpediente, type Expediente } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 
 interface ExpedienteDialogProps {
@@ -25,7 +25,7 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
       expediente: "",
       solicita: SOLICITUD_TYPES[0],
       establecimiento: "",
-      estado: ESTADO_TYPES[0],
+      ubicacion: UBICACION_TYPES[0],
       comentario: "",
     },
   });
@@ -37,7 +37,7 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
           expediente: expediente.expediente,
           solicita: expediente.solicita,
           establecimiento: expediente.establecimiento,
-          estado: expediente.estado,
+          ubicacion: expediente.ubicacion,
           comentario: expediente.comentario || "",
         });
       } else {
@@ -45,7 +45,7 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
           expediente: "",
           solicita: SOLICITUD_TYPES[0],
           establecimiento: "",
-          estado: ESTADO_TYPES[0],
+          ubicacion: UBICACION_TYPES[0],
           comentario: "",
         });
       }
@@ -131,20 +131,20 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
 
             <FormField
               control={form.control}
-              name="estado"
+              name="ubicacion"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Estado</FormLabel>
+                  <FormLabel>Ubicación</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger data-testid="select-estado">
-                        <SelectValue placeholder="Seleccionar estado" />
+                      <SelectTrigger data-testid="select-ubicacion">
+                        <SelectValue placeholder="Seleccionar ubicación" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {ESTADO_TYPES.map((estado) => (
-                        <SelectItem key={estado} value={estado} data-testid={`option-estado-${estado}`}>
-                          {estado}
+                      {UBICACION_TYPES.map((ubicacion) => (
+                        <SelectItem key={ubicacion} value={ubicacion} data-testid={`option-ubicacion-${ubicacion}`}>
+                          {ubicacion}
                         </SelectItem>
                       ))}
                     </SelectContent>

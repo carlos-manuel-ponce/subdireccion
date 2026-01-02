@@ -9,12 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Skeleton } from "@/components/ui/skeleton";
-import { EstadoBadge } from "@/components/estado-badge";
+import { UbicacionBadge } from "@/components/ubicacion-badge";
 import { ExpedienteDialog } from "@/components/expediente-dialog";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { type Expediente, type InsertExpediente, SOLICITUD_TYPES, ESTADO_TYPES, type EstadoType, type SolicitudType } from "@shared/schema";
+import { type Expediente, type InsertExpediente, SOLICITUD_TYPES, UBICACION_TYPES, type UbicacionType, type SolicitudType } from "@shared/schema";
 import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
 
 const ITEMS_PER_PAGE = 10;
@@ -24,7 +24,7 @@ export default function CreacionesHome() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
-  const [estadoFilter, setEstadoFilter] = useState<EstadoType | "all">("all");
+  const [ubicacionFilter, setUbicacionFilter] = useState<UbicacionType | "all">("all");
   const [solicitudFilter, setSolicitudFilter] = useState<SolicitudType | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -119,11 +119,11 @@ export default function CreacionesHome() {
         exp.expediente.toLowerCase().includes(searchQuery.toLowerCase()) ||
         exp.establecimiento.toLowerCase().includes(searchQuery.toLowerCase()) ||
         exp.comentario.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesEstado = estadoFilter === "all" || exp.estado === estadoFilter;
+      const matchesUbicacion = ubicacionFilter === "all" || exp.ubicacion === ubicacionFilter;
       const matchesSolicitud = solicitudFilter === "all" || exp.solicita === solicitudFilter;
-      return matchesSearch && matchesEstado && matchesSolicitud;
+      return matchesSearch && matchesUbicacion && matchesSolicitud;
     });
-  }, [expedientes, searchQuery, estadoFilter, solicitudFilter]);
+  }, [expedientes, searchQuery, ubicacionFilter, solicitudFilter]);
 
   const totalPages = Math.ceil(filteredExpedientes.length / ITEMS_PER_PAGE);
   const paginatedExpedientes = useMemo(() => {
@@ -133,12 +133,12 @@ export default function CreacionesHome() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, estadoFilter, solicitudFilter]);
+  }, [searchQuery, ubicacionFilter, solicitudFilter]);
 
-  const estadoStats = useMemo(() => {
-    const counts: Record<EstadoType, number> = {} as Record<EstadoType, number>;
-    ESTADO_TYPES.forEach(estado => {
-      counts[estado] = expedientes.filter(e => e.estado === estado).length;
+  const ubicacionStats = useMemo(() => {
+    const counts: Record<UbicacionType, number> = {} as Record<UbicacionType, number>;
+    UBICACION_TYPES.forEach(ubicacion => {
+      counts[ubicacion] = expedientes.filter(e => e.ubicacion === ubicacion).length;
     });
     return counts;
   }, [expedientes]);
@@ -173,12 +173,12 @@ export default function CreacionesHome() {
   };
 
   const clearFilters = () => {
-    setEstadoFilter("all");
+    setUbicacionFilter("all");
     setSolicitudFilter("all");
     setSearchQuery("");
   };
 
-  const hasActiveFilters = estadoFilter !== "all" || solicitudFilter !== "all" || searchQuery !== "";
+  const hasActiveFilters = ubicacionFilter !== "all" || solicitudFilter !== "all" || searchQuery !== "";
 
   useEffect(() => {
     const authModule = localStorage.getItem("authModule");
@@ -220,20 +220,20 @@ export default function CreacionesHome() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        {/* Estado Counters */}
+        {/* Ubicación Counters */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
-          {ESTADO_TYPES.map((estado) => (
+          {UBICACION_TYPES.map((ubicacion) => (
             <Card 
-              key={estado} 
-              className={`p-4 cursor-pointer transition-all hover-elevate ${estadoFilter === estado ? 'ring-2 ring-primary' : ''}`}
-              onClick={() => setEstadoFilter(estadoFilter === estado ? "all" : estado)}
-              data-testid={`counter-${estado}`}
+              key={ubicacion} 
+              className={`p-4 cursor-pointer transition-all hover-elevate ${ubicacionFilter === ubicacion ? 'ring-2 ring-primary' : ''}`}
+              onClick={() => setUbicacionFilter(ubicacionFilter === ubicacion ? "all" : ubicacion)}
+              data-testid={`counter-${ubicacion}`}
             >
               <div className="text-center">
-                <span className="text-2xl font-bold text-foreground" data-testid={`stat-value-${estado}`}>
-                  {estadoStats[estado] || 0}
+                <span className="text-2xl font-bold text-foreground" data-testid={`stat-value-${ubicacion}`}>
+                  {ubicacionStats[ubicacion] || 0}
                 </span>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{estado}</p>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{ubicacion}</p>
               </div>
             </Card>
           ))}
@@ -277,7 +277,7 @@ export default function CreacionesHome() {
               Filtros
               {hasActiveFilters && (
                 <span className="ml-2 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
-                  {(estadoFilter !== "all" ? 1 : 0) + (solicitudFilter !== "all" ? 1 : 0)}
+                  {(ubicacionFilter !== "all" ? 1 : 0) + (solicitudFilter !== "all" ? 1 : 0)}
                 </span>
               )}
             </Button>
@@ -294,15 +294,15 @@ export default function CreacionesHome() {
           <Card className="p-4 mb-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Estado</label>
-                <Select value={estadoFilter} onValueChange={(val) => setEstadoFilter(val as EstadoType | "all")}>
-                  <SelectTrigger data-testid="filter-estado">
-                    <SelectValue placeholder="Todos los estados" />
+                <label className="text-sm font-medium text-foreground">Ubicación</label>
+                <Select value={ubicacionFilter} onValueChange={(val) => setUbicacionFilter(val as UbicacionType | "all")}>
+                  <SelectTrigger data-testid="filter-ubicacion">
+                    <SelectValue placeholder="Todas las ubicaciones" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Todos los estados</SelectItem>
-                    {ESTADO_TYPES.map((estado) => (
-                      <SelectItem key={estado} value={estado}>{estado}</SelectItem>
+                    <SelectItem value="all">Todas las ubicaciones</SelectItem>
+                    {UBICACION_TYPES.map((ubicacion) => (
+                      <SelectItem key={ubicacion} value={ubicacion}>{ubicacion}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -340,7 +340,7 @@ export default function CreacionesHome() {
                   <TableHead className="text-foreground font-medium w-[120px]">Expediente</TableHead>
                   <TableHead className="text-foreground font-medium min-w-[280px]">Solicita</TableHead>
                   <TableHead className="text-foreground font-medium min-w-[200px]">Establecimiento</TableHead>
-                  <TableHead className="text-foreground font-medium w-[140px]">Estado</TableHead>
+                  <TableHead className="text-foreground font-medium w-[140px]">Ubicación</TableHead>
                   <TableHead className="text-foreground font-medium">Comentario</TableHead>
                   <TableHead className="text-foreground font-medium w-[100px] text-right">Acciones</TableHead>
                 </TableRow>
@@ -387,7 +387,7 @@ export default function CreacionesHome() {
                         {exp.establecimiento}
                       </TableCell>
                       <TableCell>
-                        <EstadoBadge estado={exp.estado} />
+                        <UbicacionBadge ubicacion={exp.ubicacion} />
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground max-w-[200px]">
                         {exp.comentario ? (

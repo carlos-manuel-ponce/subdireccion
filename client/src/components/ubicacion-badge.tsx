@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
-import type { EstadoType } from "@shared/schema";
+import type { UbicacionType } from "@shared/schema";
 
-const estadoColors: Record<EstadoType, string> = {
+const ubicacionColors: Record<UbicacionType, string> = {
   "INICIAL": "bg-blue-500/20 text-blue-300 border-blue-500/30",
   "SECUNDARIO": "bg-purple-500/20 text-purple-300 border-purple-500/30",
   "OBLIGATORIA": "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
@@ -16,18 +16,18 @@ const estadoColors: Record<EstadoType, string> = {
   "FIRMA INT.": "bg-violet-500/20 text-violet-300 border-violet-500/30",
 };
 
-interface EstadoBadgeProps {
-  estado: EstadoType;
+interface UbicacionBadgeProps {
+  ubicacion: UbicacionType;
 }
 
-export function EstadoBadge({ estado }: EstadoBadgeProps) {
+export function UbicacionBadge({ ubicacion }: UbicacionBadgeProps) {
   return (
     <Badge 
       variant="outline" 
-      className={`${estadoColors[estado]} font-medium text-xs whitespace-nowrap`}
-      data-testid={`badge-estado-${estado}`}
+      className={`${ubicacionColors[ubicacion]} font-medium text-xs whitespace-nowrap`}
+      data-testid={`badge-ubicacion-${ubicacion}`}
     >
-      {estado}
+      {ubicacion}
     </Badge>
   );
 }

@@ -35,8 +35,8 @@ export const SOLICITUD_TYPES = [
 
 export type SolicitudType = (typeof SOLICITUD_TYPES)[number];
 
-// Nomenclador de Estados (12 estados)
-export const ESTADO_TYPES = [
+// Nomenclador de Ubicaciones (12 ubicaciones)
+export const UBICACION_TYPES = [
   "INICIAL",
   "SECUNDARIO",
   "OBLIGATORIA",
@@ -51,7 +51,7 @@ export const ESTADO_TYPES = [
   "FIRMA INT.",
 ] as const;
 
-export type EstadoType = (typeof ESTADO_TYPES)[number];
+export type UbicacionType = (typeof UBICACION_TYPES)[number];
 
 // Nomenclador de Regiones Educativas
 export const REGION_TYPES = ["I", "II", "III", "IV", "V", "VI"] as const;
@@ -106,7 +106,7 @@ export const expedientes = pgTable("expedientes", {
   expediente: text("expediente").notNull(),
   solicita: text("solicita").notNull(),
   establecimiento: text("establecimiento").notNull(),
-  estado: text("estado").notNull(),
+  ubicacion: text("ubicacion").notNull(),
   comentario: text("comentario").notNull().default(""),
 });
 

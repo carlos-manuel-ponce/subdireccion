@@ -192,7 +192,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
   app.post("/api/expedientes/report", async (req, res) => {
     try {
-      const { expedientes, userName } = req.body as { expedientes: { expediente: string; solicita: string; establecimiento: string; estado: string; comentario: string }[]; userName?: string };
+      const { expedientes, userName } = req.body as { expedientes: { expediente: string; solicita: string; establecimiento: string; ubicacion: string; comentario: string }[]; userName?: string };
 
       const doc = new PDFDocument({ margin: 50, size: "A4" });
 
@@ -211,7 +211,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
           const fields = [
             { label: "Tipo de Solicitud", value: exp.solicita },
             { label: "Establecimiento", value: exp.establecimiento },
-            { label: "Estado Actual", value: exp.estado },
+            { label: "Ubicación", value: exp.ubicacion },
           ];
           if (exp.comentario) {
             fields.push({ label: "Observaciones", value: exp.comentario });
