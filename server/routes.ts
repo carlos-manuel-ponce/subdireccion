@@ -37,16 +37,17 @@ function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, moduleName
   
   doc.y = 75;
   
-  // Disclaimer paragraph
+  // Disclaimer paragraph with border/frame
+  const disclaimerText = "El presente documento, se emite a los fines de ser presentado donde corresponda, siendo el usuario generador responsable de su destino y utilización.";
+  const disclaimerHeight = 35;
+  
+  doc.strokeColor("#000000").lineWidth(0.5).rect(marginLeft, doc.y, pageWidth, disclaimerHeight).stroke();
   doc.font("Helvetica").fontSize(9).fillColor("#000000").text(
-    "El presente documento, se emite a los fines de ser presentado donde corresponda, siendo el usuario generador responsable de su destino y utilización.",
-    marginLeft, doc.y, { width: pageWidth, align: "center" }
+    disclaimerText,
+    marginLeft + 10, doc.y + 8, { width: pageWidth - 20, align: "center" }
   );
   
-  doc.y = doc.y + 25;
-  
-  // Horizontal line after disclaimer
-  doc.strokeColor("#000000").lineWidth(0.5).moveTo(marginLeft, doc.y).lineTo(marginLeft + pageWidth, doc.y).stroke();
+  doc.y = doc.y + disclaimerHeight + 10;
   
   doc.y = doc.y + 10;
   
