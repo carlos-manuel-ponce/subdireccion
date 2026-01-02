@@ -1,3 +1,4 @@
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import {
   type Expediente,
   type InsertExpediente,
@@ -14,6 +15,10 @@ import {
   TITULARIZACION_TYPES,
   JUNTA_TYPES,
 } from "@shared/schema";
+
+const supabaseUrl = process.env.SUPABASE_URL!;
+const supabaseKey = process.env.SUPABASE_ANON_KEY!;
+const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
 export interface IStorage {
   getExpedientes(): Promise<Expediente[]>;
@@ -50,7 +55,6 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
-  private expedientes: Map<string, Expediente> = new Map();
   private coberturaRegistros: Map<string, CoberturaRegistro> = new Map();
   private coberturaEventos: Map<string, CoberturaEvento> = new Map();
   private coberturaDetalles: Map<string, CoberturaDetalle> = new Map();
@@ -62,24 +66,6 @@ export class MemStorage implements IStorage {
   }
 
   private seedData() {
-    const sampleExpedientes: Expediente[] = [
-      { id: crypto.randomUUID(), expediente: "1234567/26", solicita: "CIERRE PROVISORIO DE ESTABLECIMIENTO", establecimiento: "Escuela N° 123", ubicacion: "INICIAL", comentario: "Pendiente de revisión" },
-      { id: crypto.randomUUID(), expediente: "2345678/26", solicita: "APERTURA DE DIVISIONES", establecimiento: "Colegio San Martín", ubicacion: "SECUNDARIO", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "3456789/26", solicita: "CREACIÓN Y LOCALIZACIÓN DE CARGOS", establecimiento: "Instituto Técnico N° 45", ubicacion: "LEGAL Y TÉCNICA", comentario: "En proceso" },
-      { id: crypto.randomUUID(), expediente: "4567890/26", solicita: "CAMBIO DE DENOMINACIÓN", establecimiento: "Escuela Rural N° 78", ubicacion: "DESPACHO", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "5678901/26", solicita: "FUSIÓN DE ESTABLECIMIENTOS", establecimiento: "Jardín de Infantes N° 12", ubicacion: "FIRMA MINISTRO", comentario: "Esperando firma" },
-      { id: crypto.randomUUID(), expediente: "6789012/26", solicita: "AMPLIACIÓN DE ESTRUCTURA CURRICULAR", establecimiento: "Escuela Técnica N° 34", ubicacion: "HACIENDA", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "7890123/26", solicita: "REORGANIZACIÓN DE CARGOS", establecimiento: "Colegio Nacional N° 5", ubicacion: "GESTIÓN", comentario: "Análisis en curso" },
-      { id: crypto.randomUUID(), expediente: "8901234/26", solicita: "CREACIÓN DE ANEXOS", establecimiento: "Escuela Provincial N° 89", ubicacion: "INNOVACIÓN", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "9012345/26", solicita: "CAMBIO DE NIVEL DE JORNADA", establecimiento: "Instituto Superior N° 2", ubicacion: "INFRAESTRUCTURA", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "0123456/26", solicita: "TRASLADO DE ESTABLECIMIENTO EDUCATIVO", establecimiento: "Escuela Especial N° 7", ubicacion: "OBLIGATORIA", comentario: "Documentación completa" },
-      { id: crypto.randomUUID(), expediente: "1122334/26", solicita: "READECUACIÓN DE POF", establecimiento: "Colegio Secundario N° 15", ubicacion: "LIQUIDACIONES", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "2233445/26", solicita: "CIERRE DE DIVISIONES", establecimiento: "Escuela Primaria N° 200", ubicacion: "FIRMA INT.", comentario: "Revisión final" },
-    ];
-
-    sampleExpedientes.forEach((exp) => {
-      this.expedientes.set(exp.id, exp);
-    });
 
     const sampleRegistros: CoberturaRegistro[] = [
       { id: crypto.randomUUID(), region: "I", nivel: "INICIAL Y PRIMARIO", responsable: "YANINA VARGAS", expediente: "1001/26", pedidoFileName: null, pedidoFilePath: null },
@@ -145,30 +131,69 @@ export class MemStorage implements IStorage {
   }
 
   async getExpedientes(): Promise<Expediente[]> {
-    return Array.from(this.expedientes.values());
+    const { data, error } = await supabase.from("creaciones").select("*");
+    if (error) {
+      console.error("Error fetching expedientes:", error);
+      return [];
+    }
+    return data || [];
   }
 
   async getExpediente(id: string): Promise<Expediente | undefined> {
-    return this.expedientes.get(id);
+    const { data, error } = await supabase.from("creaciones").select("*").eq("id", id).single();
+    if (error) {
+      console.error("Error fetching expediente:", error);
+      return undefined;
+    }
+    return data || undefined;
   }
 
   async createExpediente(data: InsertExpediente): Promise<Expediente> {
-    const id = crypto.randomUUID();
-    const expediente: Expediente = { id, expediente: data.expediente, solicita: data.solicita, establecimiento: data.establecimiento, ubicacion: data.ubicacion, comentario: data.comentario ?? "" };
-    this.expedientes.set(id, expediente);
-    return expediente;
+    const { data: created, error } = await supabase
+      .from("creaciones")
+      .insert({
+        expediente: data.expediente,
+        solicita: data.solicita,
+        establecimiento: data.establecimiento,
+        ubicacion: data.ubicacion,
+        comentario: data.comentario ?? "",
+      })
+      .select()
+      .single();
+    if (error) {
+      console.error("Error creating expediente:", error);
+      throw new Error("Failed to create expediente");
+    }
+    return created;
   }
 
   async updateExpediente(id: string, data: InsertExpediente): Promise<Expediente | undefined> {
-    const existing = this.expedientes.get(id);
-    if (!existing) return undefined;
-    const updated: Expediente = { id, expediente: data.expediente, solicita: data.solicita, establecimiento: data.establecimiento, ubicacion: data.ubicacion, comentario: data.comentario ?? "" };
-    this.expedientes.set(id, updated);
-    return updated;
+    const { data: updated, error } = await supabase
+      .from("creaciones")
+      .update({
+        expediente: data.expediente,
+        solicita: data.solicita,
+        establecimiento: data.establecimiento,
+        ubicacion: data.ubicacion,
+        comentario: data.comentario ?? "",
+      })
+      .eq("id", id)
+      .select()
+      .single();
+    if (error) {
+      console.error("Error updating expediente:", error);
+      return undefined;
+    }
+    return updated || undefined;
   }
 
   async deleteExpediente(id: string): Promise<boolean> {
-    return this.expedientes.delete(id);
+    const { error } = await supabase.from("creaciones").delete().eq("id", id);
+    if (error) {
+      console.error("Error deleting expediente:", error);
+      return false;
+    }
+    return true;
   }
 
   async getCoberturaRegistros(): Promise<CoberturaRegistro[]> {
