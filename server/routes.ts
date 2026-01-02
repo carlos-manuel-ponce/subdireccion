@@ -125,14 +125,16 @@ function addPDFFooter(doc: InstanceType<typeof PDFDocument>) {
   );
 }
 
-function addPageBorder(doc: InstanceType<typeof PDFDocument>) {
+function addPageBorder(doc: InstanceType<typeof PDFDocument>, endY?: number) {
   const marginLeft = 30;
   const marginTop = 25;
   const pageWidth = 535;
-  const pageHeight = 792;
+  
+  // If endY is provided, use it; otherwise use current position + some padding
+  const borderHeight = endY ? (endY - marginTop + 20) : (doc.y - marginTop + 20);
   
   doc.strokeColor("#000000").lineWidth(1);
-  doc.rect(marginLeft, marginTop, pageWidth, pageHeight).stroke();
+  doc.rect(marginLeft, marginTop, pageWidth, borderHeight).stroke();
 }
 
 // Legacy function for other reports
@@ -319,14 +321,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       res.setHeader("Content-Disposition", `attachment; filename=informe-creaciones-${Date.now()}.pdf`);
 
       doc.pipe(res);
-      
-      // Add page border on first page
-      addPageBorder(doc);
-      
-      // Add page border on new pages
-      doc.on("pageAdded", () => {
-        addPageBorder(doc);
-      });
 
       const totalRegistros = expedientes ? expedientes.length : 0;
       createCoberturaHeader(doc, "CREACIONES", userName || "Usuario del Sistema", totalRegistros);
@@ -348,6 +342,9 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         doc.font("Helvetica").fontSize(10).text("No se encontraron expedientes para los filtros aplicados.");
         addPDFFooter(doc);
       }
+      
+      // Add page border at the end, sized to content
+      addPageBorder(doc);
 
       doc.end();
     } catch (error) {
@@ -540,14 +537,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       res.setHeader("Content-Disposition", `attachment; filename=informe-cobertura-${Date.now()}.pdf`);
 
       doc.pipe(res);
-      
-      // Add page border on first page
-      addPageBorder(doc);
-      
-      // Add page border on new pages
-      doc.on("pageAdded", () => {
-        addPageBorder(doc);
-      });
 
       // Generate report with module name
       const totalRegistros = detalles ? detalles.length : 0;
@@ -572,6 +561,9 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         doc.font("Helvetica").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
         addPDFFooter(doc);
       }
+      
+      // Add page border at the end, sized to content
+      addPageBorder(doc);
 
       doc.end();
     } catch (error) {
@@ -600,14 +592,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       res.setHeader("Content-Disposition", `attachment; filename=informe-titularizaciones-${Date.now()}.pdf`);
 
       doc.pipe(res);
-      
-      // Add page border on first page
-      addPageBorder(doc);
-      
-      // Add page border on new pages
-      doc.on("pageAdded", () => {
-        addPageBorder(doc);
-      });
 
       const totalRegistros = registros ? registros.length : 0;
       createCoberturaHeader(doc, "TITULARIZACIONES", userName || "Usuario del Sistema", totalRegistros);
@@ -631,6 +615,9 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         doc.font("Helvetica").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
         addPDFFooter(doc);
       }
+      
+      // Add page border at the end, sized to content
+      addPageBorder(doc);
 
       doc.end();
     } catch (error) {
