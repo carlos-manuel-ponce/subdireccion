@@ -354,30 +354,153 @@ export class MemStorage implements IStorage {
   }
 
   async getCoberturaDetalles(): Promise<CoberturaDetalle[]> {
-    return Array.from(this.coberturaDetalles.values());
+    const { data, error } = await supabase.from("postulantes_llamados").select("*");
+    if (error) {
+      console.error("Error fetching cobertura detalles:", error);
+      return [];
+    }
+    return (data || []).map((row: any) => ({
+      id: String(row.id),
+      llamado: row.llamado || "",
+      tipo: row.tipo || "",
+      fecha: row.fecha || "",
+      juntaClasificacion: row.junta_clasificacion || "",
+      region: row.region || "",
+      localidad: row.localidad || "",
+      establecimiento: row.establecimiento || "",
+      nivel: row.nivel || "",
+      caracter: row.caracter || "",
+      descripcion: row.descripcion || "",
+      apellido: row.apellido || "",
+      nombre: row.nombre || "",
+      dni: row.dni || "",
+      habilitacion: row.habilitacion || "",
+    }));
   }
 
   async getCoberturaDetalle(id: string): Promise<CoberturaDetalle | undefined> {
-    return this.coberturaDetalles.get(id);
+    const { data, error } = await supabase.from("postulantes_llamados").select("*").eq("id", parseInt(id)).single();
+    if (error) {
+      console.error("Error fetching cobertura detalle:", error);
+      return undefined;
+    }
+    if (!data) return undefined;
+    return {
+      id: String(data.id),
+      llamado: data.llamado || "",
+      tipo: data.tipo || "",
+      fecha: data.fecha || "",
+      juntaClasificacion: data.junta_clasificacion || "",
+      region: data.region || "",
+      localidad: data.localidad || "",
+      establecimiento: data.establecimiento || "",
+      nivel: data.nivel || "",
+      caracter: data.caracter || "",
+      descripcion: data.descripcion || "",
+      apellido: data.apellido || "",
+      nombre: data.nombre || "",
+      dni: data.dni || "",
+      habilitacion: data.habilitacion || "",
+    };
   }
 
   async createCoberturaDetalle(data: InsertCoberturaDetalle): Promise<CoberturaDetalle> {
-    const id = crypto.randomUUID();
-    const detalle: CoberturaDetalle = { id, ...data };
-    this.coberturaDetalles.set(id, detalle);
-    return detalle;
+    const { data: created, error } = await supabase
+      .from("postulantes_llamados")
+      .insert({
+        llamado: data.llamado,
+        tipo: data.tipo,
+        fecha: data.fecha,
+        junta_clasificacion: data.juntaClasificacion,
+        region: data.region,
+        localidad: data.localidad,
+        establecimiento: data.establecimiento,
+        nivel: data.nivel,
+        caracter: data.caracter,
+        descripcion: data.descripcion,
+        apellido: data.apellido,
+        nombre: data.nombre,
+        dni: data.dni,
+        habilitacion: data.habilitacion,
+      })
+      .select()
+      .single();
+    if (error) {
+      console.error("Error creating cobertura detalle:", error);
+      throw new Error("Failed to create cobertura detalle");
+    }
+    return {
+      id: String(created.id),
+      llamado: created.llamado || "",
+      tipo: created.tipo || "",
+      fecha: created.fecha || "",
+      juntaClasificacion: created.junta_clasificacion || "",
+      region: created.region || "",
+      localidad: created.localidad || "",
+      establecimiento: created.establecimiento || "",
+      nivel: created.nivel || "",
+      caracter: created.caracter || "",
+      descripcion: created.descripcion || "",
+      apellido: created.apellido || "",
+      nombre: created.nombre || "",
+      dni: created.dni || "",
+      habilitacion: created.habilitacion || "",
+    };
   }
 
   async updateCoberturaDetalle(id: string, data: InsertCoberturaDetalle): Promise<CoberturaDetalle | undefined> {
-    const existing = this.coberturaDetalles.get(id);
-    if (!existing) return undefined;
-    const updated: CoberturaDetalle = { id, ...data };
-    this.coberturaDetalles.set(id, updated);
-    return updated;
+    const { data: updated, error } = await supabase
+      .from("postulantes_llamados")
+      .update({
+        llamado: data.llamado,
+        tipo: data.tipo,
+        fecha: data.fecha,
+        junta_clasificacion: data.juntaClasificacion,
+        region: data.region,
+        localidad: data.localidad,
+        establecimiento: data.establecimiento,
+        nivel: data.nivel,
+        caracter: data.caracter,
+        descripcion: data.descripcion,
+        apellido: data.apellido,
+        nombre: data.nombre,
+        dni: data.dni,
+        habilitacion: data.habilitacion,
+      })
+      .eq("id", parseInt(id))
+      .select()
+      .single();
+    if (error) {
+      console.error("Error updating cobertura detalle:", error);
+      return undefined;
+    }
+    if (!updated) return undefined;
+    return {
+      id: String(updated.id),
+      llamado: updated.llamado || "",
+      tipo: updated.tipo || "",
+      fecha: updated.fecha || "",
+      juntaClasificacion: updated.junta_clasificacion || "",
+      region: updated.region || "",
+      localidad: updated.localidad || "",
+      establecimiento: updated.establecimiento || "",
+      nivel: updated.nivel || "",
+      caracter: updated.caracter || "",
+      descripcion: updated.descripcion || "",
+      apellido: updated.apellido || "",
+      nombre: updated.nombre || "",
+      dni: updated.dni || "",
+      habilitacion: updated.habilitacion || "",
+    };
   }
 
   async deleteCoberturaDetalle(id: string): Promise<boolean> {
-    return this.coberturaDetalles.delete(id);
+    const { error } = await supabase.from("postulantes_llamados").delete().eq("id", parseInt(id));
+    if (error) {
+      console.error("Error deleting cobertura detalle:", error);
+      return false;
+    }
+    return true;
   }
 
   async getTitularizacionEstadisticas(): Promise<TitularizacionEstadistica[]> {
