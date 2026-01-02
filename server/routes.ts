@@ -23,31 +23,62 @@ if (!fs.existsSync(uploadsDir)) {
 
 const logoPath = path.join(process.cwd(), "attached_assets", "LOGO_BLANCO_1767308770849.png");
 
-function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string, subtitle?: string) {
+function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string) {
+  const startY = 40;
+  
   if (fs.existsSync(logoPath)) {
-    doc.image(logoPath, 50, 40, { height: 50 });
+    doc.image(logoPath, 50, startY, { height: 50 });
   }
   
-  doc.font("Times-Bold").fontSize(16).text(title, 50, 50, { align: "center" });
-  doc.moveDown(0.3);
-  doc.font("Times-Roman").fontSize(11).text("SUBDIRECCIÓN COBERTURA DE CARGOS", { align: "center" });
-  doc.fontSize(10).text("Dirección Gestión Educativa", { align: "center" });
-  doc.moveDown(0.5);
-  doc.fontSize(10).text(`Fecha de emisión: ${new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })}`, { align: "center" });
+  doc.font("Times-Bold").fontSize(16).text(title, 50, startY + 15, { align: "center", width: 495 });
   
-  if (subtitle) {
-    doc.moveDown(0.3);
-    doc.font("Times-Bold").fontSize(11).text(subtitle, { align: "center" });
-  }
-  
-  doc.moveDown();
+  doc.y = startY + 70;
   doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
   doc.moveDown();
 }
 
-function createPDFFooter(doc: InstanceType<typeof PDFDocument>) {
+function createPDFFooter(doc: InstanceType<typeof PDFDocument>, userName: string = "Usuario del Sistema") {
+  const now = new Date();
+  const dateStr = now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "2-digit" });
+  const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  
   doc.moveDown(2);
-  doc.font("Times-Italic").fontSize(8).text("Documento generado automáticamente por el Sistema de Gestión - Subdirección Cobertura de Cargos", { align: "center" });
+  doc.font("Times-Roman").fontSize(9).text("Documento generado automáticamente por Subdirección Cobertura de Cargos", { align: "center" });
+  doc.font("Times-Roman").fontSize(9).text(`Emisión: ${dateStr}, ${timeStr}, ${userName}`, { align: "center" });
+}
+
+function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: string; value: string }[], title: string) {
+  const cardX = 50;
+  const cardWidth = 495;
+  const padding = 8;
+  const lineHeight = 14;
+  
+  const cardHeight = padding * 2 + (fields.length + 1) * lineHeight + 5;
+  
+  if (doc.y + cardHeight > 750) {
+    doc.addPage();
+  }
+  
+  const startY = doc.y;
+  
+  doc.strokeColor("#999999").lineWidth(0.5);
+  doc.rect(cardX, startY, cardWidth, cardHeight).stroke();
+  
+  doc.fillColor("#f0f0f0").rect(cardX, startY, cardWidth, lineHeight + padding).fill();
+  doc.fillColor("#000000");
+  
+  doc.font("Times-Bold").fontSize(10).text(title, cardX + padding, startY + padding / 2 + 2, { width: cardWidth - padding * 2 });
+  
+  let currentY = startY + lineHeight + padding + 5;
+  
+  fields.forEach((field) => {
+    doc.font("Times-Bold").fontSize(9).text(`${field.label}: `, cardX + padding, currentY, { continued: true });
+    doc.font("Times-Roman").fontSize(9).text(field.value);
+    currentY += lineHeight;
+  });
+  
+  doc.y = startY + cardHeight + 8;
+  doc.strokeColor("#000000");
 }
 
 const multerStorage = multer.diskStorage({
@@ -151,7 +182,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
   app.post("/api/expedientes/report", async (req, res) => {
     try {
-      const { expedientes } = req.body as { expedientes: { expediente: string; solicita: string; establecimiento: string; estado: string; comentario: string }[] };
+      const { expedientes, userName } = req.body as { expedientes: { expediente: string; solicita: string; establecimiento: string; estado: string; comentario: string }[]; userName?: string };
 
       const doc = new PDFDocument({ margin: 50, size: "A4" });
 
@@ -167,29 +198,22 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         doc.moveDown();
 
         expedientes.forEach((exp, index) => {
-          if (doc.y > 720) {
-            doc.addPage();
-          }
-
-          doc.font("Times-Bold").fontSize(10).text(`${index + 1}. Expediente N° ${exp.expediente}`, { underline: true });
-          doc.font("Times-Roman").fontSize(10);
-          doc.moveDown(0.3);
-          doc.text(`Tipo de Solicitud: ${exp.solicita}`);
-          doc.text(`Establecimiento: ${exp.establecimiento}`);
-          doc.text(`Estado Actual: ${exp.estado}`);
+          const fields = [
+            { label: "Tipo de Solicitud", value: exp.solicita },
+            { label: "Establecimiento", value: exp.establecimiento },
+            { label: "Estado Actual", value: exp.estado },
+          ];
           if (exp.comentario) {
-            doc.text(`Observaciones: ${exp.comentario}`);
+            fields.push({ label: "Observaciones", value: exp.comentario });
           }
-
-          doc.moveDown(0.5);
-          doc.strokeColor("#cccccc").moveTo(50, doc.y).lineTo(545, doc.y).stroke().strokeColor("#000000");
-          doc.moveDown(0.5);
+          
+          drawRecordCard(doc, fields, `${index + 1}. Expediente N° ${exp.expediente}`);
         });
       } else {
         doc.font("Times-Roman").fontSize(10).text("No se encontraron expedientes para los filtros aplicados.");
       }
 
-      createPDFFooter(doc);
+      createPDFFooter(doc, userName);
 
       doc.end();
     } catch (error) {
@@ -374,7 +398,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
   // ==================== PDF GENERATION ====================
   app.post("/api/cobertura/detalles/report", async (req, res) => {
     try {
-      const { establecimiento, detalles } = req.body as { establecimiento?: string; detalles: CoberturaDetalle[] };
+      const { establecimiento, detalles, userName } = req.body as { establecimiento?: string; detalles: CoberturaDetalle[]; userName?: string };
 
       const doc = new PDFDocument({ margin: 50, size: "A4" });
 
@@ -383,37 +407,34 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
       doc.pipe(res);
 
-      createPDFHeader(doc, "INFORME DE COBERTURA DE CARGOS", establecimiento ? `Establecimiento: ${establecimiento}` : undefined);
+      createPDFHeader(doc, "INFORME DE COBERTURA DE CARGOS");
+
+      if (establecimiento) {
+        doc.font("Times-Bold").fontSize(11).text(`Filtro: ${establecimiento}`, { align: "left" });
+        doc.moveDown(0.5);
+      }
 
       if (detalles && detalles.length > 0) {
         doc.font("Times-Bold").fontSize(11).text(`Total de registros: ${detalles.length}`, { align: "left" });
         doc.moveDown();
 
         detalles.forEach((detalle, index) => {
-          if (doc.y > 720) {
-            doc.addPage();
-          }
-
-          doc.font("Times-Bold").fontSize(10).text(`${index + 1}. ${detalle.establecimiento}`, { underline: true });
-          doc.font("Times-Roman").fontSize(10);
-          doc.moveDown(0.3);
-          doc.text(`Llamado: ${detalle.llamado}  |  Tipo: ${detalle.tipo}  |  Fecha: ${detalle.fecha}`);
-          doc.text(`Región: ${detalle.region}  |  Localidad: ${detalle.localidad}`);
-          doc.text(`Nivel: ${detalle.nivel}  |  Carácter: ${detalle.caracter}`);
-          doc.text(`Descripción: ${detalle.descripcion}`);
-          doc.font("Times-Bold").text(`Docente: ${detalle.apellido}, ${detalle.nombre}`, { continued: true });
-          doc.font("Times-Roman").text(`  -  DNI: ${detalle.dni}`);
-          doc.text(`Habilitación: ${detalle.habilitacion}`);
-
-          doc.moveDown(0.5);
-          doc.strokeColor("#cccccc").moveTo(50, doc.y).lineTo(545, doc.y).stroke().strokeColor("#000000");
-          doc.moveDown(0.5);
+          const fields = [
+            { label: "Llamado", value: `${detalle.llamado} | Tipo: ${detalle.tipo} | Fecha: ${detalle.fecha}` },
+            { label: "Región / Localidad", value: `${detalle.region} / ${detalle.localidad}` },
+            { label: "Nivel / Carácter", value: `${detalle.nivel} / ${detalle.caracter}` },
+            { label: "Descripción", value: detalle.descripcion },
+            { label: "Docente", value: `${detalle.apellido}, ${detalle.nombre} - DNI: ${detalle.dni}` },
+            { label: "Habilitación", value: detalle.habilitacion },
+          ];
+          
+          drawRecordCard(doc, fields, `${index + 1}. ${detalle.establecimiento}`);
         });
       } else {
         doc.font("Times-Roman").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
       }
 
-      createPDFFooter(doc);
+      createPDFFooter(doc, userName);
 
       doc.end();
     } catch (error) {
@@ -434,7 +455,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
   app.post("/api/titularizaciones/registros/report", async (req, res) => {
     try {
-      const { registros } = req.body as { registros: TitularizacionRegistro[] };
+      const { registros, userName } = req.body as { registros: TitularizacionRegistro[]; userName?: string };
 
       const doc = new PDFDocument({ margin: 50, size: "A4" });
 
@@ -450,33 +471,24 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         doc.moveDown();
 
         registros.forEach((reg, index) => {
-          if (doc.y > 720) {
-            doc.addPage();
-          }
-
-          doc.font("Times-Bold").fontSize(10).text(`${index + 1}. Expediente N° ${reg.expediente}`, { underline: true });
-          doc.font("Times-Roman").fontSize(10);
-          doc.moveDown(0.3);
-          doc.font("Times-Bold").text(`Docente: ${reg.apellido}, ${reg.nombre}`, { continued: true });
-          doc.font("Times-Roman").text(`  -  DNI: ${reg.dni}`);
-          doc.text(`Establecimiento: ${reg.establecimiento}`);
-          doc.text(`Localidad: ${reg.localidad}  |  Departamento: ${reg.departamento}`);
-          doc.text(`Junta de Clasificación: ${reg.juntaClasificacion}`);
-          doc.font("Times-Bold").text(`Titularizar en: ${reg.titularizarEn}`);
-          doc.font("Times-Roman");
+          const fields = [
+            { label: "Docente", value: `${reg.apellido}, ${reg.nombre} - DNI: ${reg.dni}` },
+            { label: "Establecimiento", value: reg.establecimiento },
+            { label: "Localidad / Departamento", value: `${reg.localidad} / ${reg.departamento}` },
+            { label: "Junta de Clasificación", value: reg.juntaClasificacion },
+            { label: "Titularizar en", value: reg.titularizarEn },
+          ];
           if (reg.renunciaA) {
-            doc.text(`Renuncia a: ${reg.renunciaA}`);
+            fields.push({ label: "Renuncia a", value: reg.renunciaA });
           }
-
-          doc.moveDown(0.5);
-          doc.strokeColor("#cccccc").moveTo(50, doc.y).lineTo(545, doc.y).stroke().strokeColor("#000000");
-          doc.moveDown(0.5);
+          
+          drawRecordCard(doc, fields, `${index + 1}. Expediente N° ${reg.expediente}`);
         });
       } else {
         doc.font("Times-Roman").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
       }
 
-      createPDFFooter(doc);
+      createPDFFooter(doc, userName);
 
       doc.end();
     } catch (error) {

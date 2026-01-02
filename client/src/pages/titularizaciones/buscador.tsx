@@ -65,7 +65,10 @@ export default function BuscadorPage() {
       const response = await fetch("/api/titularizaciones/registros/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ registros: filteredRegistros }),
+        body: JSON.stringify({ 
+          registros: filteredRegistros,
+          userName: "Carlos Manuel Ponce"
+        }),
       });
       if (!response.ok) throw new Error("Error al generar el informe");
       return response.blob();

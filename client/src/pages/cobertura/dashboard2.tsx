@@ -66,6 +66,7 @@ export default function Dashboard2Page() {
         body: JSON.stringify({
           establecimiento: searchQuery || undefined,
           detalles: filteredDetalles,
+          userName: "Carlos Manuel Ponce"
         }),
       });
       if (!response.ok) throw new Error("Error al generar el informe");

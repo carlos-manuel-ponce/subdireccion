@@ -81,7 +81,10 @@ export default function CreacionesHome() {
       const response = await fetch("/api/expedientes/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ expedientes: filteredExpedientes }),
+        body: JSON.stringify({ 
+          expedientes: filteredExpedientes,
+          userName: "Carlos Manuel Ponce"
+        }),
       });
       if (!response.ok) throw new Error("Error al generar el informe");
       return response.blob();
