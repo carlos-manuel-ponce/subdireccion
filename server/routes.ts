@@ -357,9 +357,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         doc.font("Helvetica").fontSize(10).text("No se encontraron expedientes para los filtros aplicados.");
         addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       }
-      
-      // Add page border at the end, sized to content
-      addPageBorder(doc);
 
       doc.end();
     } catch (error) {
@@ -576,9 +573,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         doc.font("Helvetica").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
         addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       }
-      
-      // Add page border at the end, sized to content
-      addPageBorder(doc);
 
       doc.end();
     } catch (error) {
@@ -630,9 +624,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         doc.font("Helvetica").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
         addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       }
-      
-      // Add page border at the end, sized to content
-      addPageBorder(doc);
 
       doc.end();
     } catch (error) {
