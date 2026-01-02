@@ -42,13 +42,13 @@ function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, moduleName
     marginLeft + 10, doc.y + 8, { width: pageWidth - 20, align: "center" }
   );
   
-  doc.y = doc.y + disclaimerHeight + 8;
+  doc.y = doc.y + disclaimerHeight + 5;
   
   // Registros Encontrados - between disclaimer and first table
   doc.font("Helvetica").fontSize(9).fillColor("#000000");
   doc.text(`Registros Encontrados:  ${totalRegistros}`, marginLeft, doc.y);
   
-  doc.y = doc.y + 15;
+  doc.y = doc.y + 8;
 }
 
 function addPDFFooterWithInfo(doc: InstanceType<typeof PDFDocument>, userName: string = "Usuario del Sistema") {
