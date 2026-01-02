@@ -23,7 +23,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 const logoPath = path.join(process.cwd(), "attached_assets", "LOGO_BLANCO_1767308770849.png");
 
-function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string) {
+function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string, userName: string = "Usuario del Sistema") {
   const startY = 40;
   
   if (fs.existsSync(logoPath)) {
@@ -35,17 +35,15 @@ function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string) {
   doc.y = startY + 70;
   doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
   doc.moveDown();
-}
-
-function createPDFFooter(doc: InstanceType<typeof PDFDocument>, userName: string = "Usuario del Sistema") {
+  
   const now = new Date();
   const dateStr = now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "2-digit" });
   const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
   
-  doc.moveDown(2);
   doc.font("Times-Roman").fontSize(9).text(`Emisión: ${dateStr}, ${timeStr}`, 50, doc.y, { align: "center", width: 495 });
   doc.font("Times-Roman").fontSize(9).text(`Usuario: ${userName}`, 50, doc.y, { align: "center", width: 495 });
   doc.font("Times-Roman").fontSize(9).text("Documento generado automáticamente por Subdirección Cobertura de Cargos", 50, doc.y, { align: "center", width: 495 });
+  doc.moveDown();
 }
 
 function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: string; value: string }[], title: string) {
@@ -201,7 +199,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
       doc.pipe(res);
 
-      createPDFHeader(doc, "INFORME DE CREACIONES");
+      createPDFHeader(doc, "INFORME DE CREACIONES", userName);
 
       if (expedientes && expedientes.length > 0) {
         doc.font("Times-Bold").fontSize(11).text(`Total de expedientes: ${expedientes.length}`, { align: "left" });
@@ -222,8 +220,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       } else {
         doc.font("Times-Roman").fontSize(10).text("No se encontraron expedientes para los filtros aplicados.");
       }
-
-      createPDFFooter(doc, userName);
 
       doc.end();
     } catch (error) {
@@ -417,7 +413,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
       doc.pipe(res);
 
-      createPDFHeader(doc, "INFORME DE COBERTURA DE CARGOS");
+      createPDFHeader(doc, "INFORME DE COBERTURA DE CARGOS", userName);
 
       if (establecimiento) {
         doc.font("Times-Bold").fontSize(11).text(`Filtro: ${establecimiento}`, { align: "left" });
@@ -443,8 +439,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       } else {
         doc.font("Times-Roman").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
       }
-
-      createPDFFooter(doc, userName);
 
       doc.end();
     } catch (error) {
@@ -474,7 +468,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
       doc.pipe(res);
 
-      createPDFHeader(doc, "INFORME DE TITULARIZACIONES");
+      createPDFHeader(doc, "INFORME DE TITULARIZACIONES", userName);
 
       if (registros && registros.length > 0) {
         doc.font("Times-Bold").fontSize(11).text(`Total de registros: ${registros.length}`, { align: "left" });
@@ -497,8 +491,6 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       } else {
         doc.font("Times-Roman").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
       }
-
-      createPDFFooter(doc, userName);
 
       doc.end();
     } catch (error) {
