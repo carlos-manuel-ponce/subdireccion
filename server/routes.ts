@@ -44,7 +44,8 @@ function createPDFFooter(doc: InstanceType<typeof PDFDocument>, userName: string
   
   doc.moveDown(2);
   doc.font("Times-Roman").fontSize(9).text("Documento generado automáticamente por Subdirección Cobertura de Cargos", { align: "center" });
-  doc.font("Times-Roman").fontSize(9).text(`Emisión: ${dateStr}, ${timeStr}, ${userName}`, { align: "center" });
+  doc.font("Times-Roman").fontSize(9).text(`Emisión: ${dateStr}, ${timeStr}`, { align: "center" });
+  doc.font("Times-Roman").fontSize(9).text(`Usuario: ${userName}`, { align: "center" });
 }
 
 function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: string; value: string }[], title: string) {
