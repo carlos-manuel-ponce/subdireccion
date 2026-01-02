@@ -311,27 +311,34 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       res.setHeader("Content-Disposition", `attachment; filename=informe-creaciones-${Date.now()}.pdf`);
 
       doc.pipe(res);
+      
+      // Add page border on first page
+      addPageBorder(doc);
+      
+      // Add page border on new pages
+      doc.on("pageAdded", () => {
+        addPageBorder(doc);
+      });
 
-      createPDFHeader(doc, "INFORME DE CREACIONES", userName);
+      const totalRegistros = expedientes ? expedientes.length : 0;
+      createCoberturaHeader(doc, "CREACIONES", userName || "Usuario del Sistema", totalRegistros);
 
       if (expedientes && expedientes.length > 0) {
-        doc.font("Times-Bold").fontSize(11).text(`Total de expedientes: ${expedientes.length}`, { align: "left" });
-        doc.moveDown();
-
         expedientes.forEach((exp, index) => {
           const fields = [
-            { label: "Solicitud", value: exp.solicita },
-            { label: "Establecimiento", value: exp.establecimiento },
-            { label: "Ubicación", value: exp.ubicacion },
+            { label: "SOLICITUD", value: exp.solicita },
+            { label: "ESTABLECIMIENTO", value: exp.establecimiento },
+            { label: "UBICACION", value: exp.ubicacion },
+            { label: "OBSERVACIONES", value: exp.comentario || "" },
           ];
-          if (exp.comentario) {
-            fields.push({ label: "Observaciones", value: exp.comentario });
-          }
           
-          drawRecordCard(doc, fields, `${index + 1}. Expediente N° ${exp.expediente}`);
+          drawEstablecimientoCard(doc, `Expediente N° ${exp.expediente}`, fields, index + 1);
         });
+        
+        addPDFFooter(doc);
       } else {
-        doc.font("Times-Roman").fontSize(10).text("No se encontraron expedientes para los filtros aplicados.");
+        doc.font("Helvetica").fontSize(10).text("No se encontraron expedientes para los filtros aplicados.");
+        addPDFFooter(doc);
       }
 
       doc.end();
@@ -585,29 +592,36 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       res.setHeader("Content-Disposition", `attachment; filename=informe-titularizaciones-${Date.now()}.pdf`);
 
       doc.pipe(res);
+      
+      // Add page border on first page
+      addPageBorder(doc);
+      
+      // Add page border on new pages
+      doc.on("pageAdded", () => {
+        addPageBorder(doc);
+      });
 
-      createPDFHeader(doc, "INFORME DE TITULARIZACIONES", userName);
+      const totalRegistros = registros ? registros.length : 0;
+      createCoberturaHeader(doc, "TITULARIZACIONES", userName || "Usuario del Sistema", totalRegistros);
 
       if (registros && registros.length > 0) {
-        doc.font("Times-Bold").fontSize(11).text(`Total de registros: ${registros.length}`, { align: "left" });
-        doc.moveDown();
-
         registros.forEach((reg, index) => {
           const fields = [
-            { label: "Docente", value: `${reg.apellido}, ${reg.nombre} - DNI: ${reg.dni}` },
-            { label: "Establecimiento", value: reg.establecimiento },
-            { label: "Localidad / Departamento", value: `${reg.localidad} / ${reg.departamento}` },
-            { label: "Junta de Clasificación", value: reg.juntaClasificacion },
-            { label: "Titularizar en", value: reg.titularizarEn },
+            { label: "DOCENTE", value: `${reg.apellido}, ${reg.nombre} - DNI: ${reg.dni}` },
+            { label: "ESTABLECIMIENTO", value: reg.establecimiento },
+            { label: "LOCALIDAD / DEPARTAMENTO", value: `${reg.localidad} / ${reg.departamento}` },
+            { label: "JUNTA DE CLASIFICACION", value: reg.juntaClasificacion },
+            { label: "TITULARIZAR EN", value: reg.titularizarEn },
+            { label: "RENUNCIA A", value: reg.renunciaA || "" },
           ];
-          if (reg.renunciaA) {
-            fields.push({ label: "Renuncia a", value: reg.renunciaA });
-          }
           
-          drawRecordCard(doc, fields, `${index + 1}. Expediente N° ${reg.expediente}`);
+          drawEstablecimientoCard(doc, `Expediente N° ${reg.expediente}`, fields, index + 1);
         });
+        
+        addPDFFooter(doc);
       } else {
-        doc.font("Times-Roman").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
+        doc.font("Helvetica").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
+        addPDFFooter(doc);
       }
 
       doc.end();
