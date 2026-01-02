@@ -63,18 +63,18 @@ export class MemStorage implements IStorage {
 
   private seedData() {
     const sampleExpedientes: Expediente[] = [
-      { id: crypto.randomUUID(), expediente: "1234567/26", solicita: "CIERRE PROVISORIO DE ESTABLECIMIENTO", establecimiento: "Escuela N° 123", estado: "INICIAL", comentario: "Pendiente de revisión" },
-      { id: crypto.randomUUID(), expediente: "2345678/26", solicita: "APERTURA DE DIVISIONES", establecimiento: "Colegio San Martín", estado: "SECUNDARIO", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "3456789/26", solicita: "CREACIÓN Y LOCALIZACIÓN DE CARGOS", establecimiento: "Instituto Técnico N° 45", estado: "LEGAL Y TÉCNICA", comentario: "En proceso" },
-      { id: crypto.randomUUID(), expediente: "4567890/26", solicita: "CAMBIO DE DENOMINACIÓN", establecimiento: "Escuela Rural N° 78", estado: "DESPACHO", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "5678901/26", solicita: "FUSIÓN DE ESTABLECIMIENTOS", establecimiento: "Jardín de Infantes N° 12", estado: "FIRMA MINISTRO", comentario: "Esperando firma" },
-      { id: crypto.randomUUID(), expediente: "6789012/26", solicita: "AMPLIACIÓN DE ESTRUCTURA CURRICULAR", establecimiento: "Escuela Técnica N° 34", estado: "HACIENDA", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "7890123/26", solicita: "REORGANIZACIÓN DE CARGOS", establecimiento: "Colegio Nacional N° 5", estado: "GESTIÓN", comentario: "Análisis en curso" },
-      { id: crypto.randomUUID(), expediente: "8901234/26", solicita: "CREACIÓN DE ANEXOS", establecimiento: "Escuela Provincial N° 89", estado: "INNOVACIÓN", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "9012345/26", solicita: "CAMBIO DE NIVEL DE JORNADA", establecimiento: "Instituto Superior N° 2", estado: "INFRAESTRUCTURA", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "0123456/26", solicita: "TRASLADO DE ESTABLECIMIENTO EDUCATIVO", establecimiento: "Escuela Especial N° 7", estado: "OBLIGATORIA", comentario: "Documentación completa" },
-      { id: crypto.randomUUID(), expediente: "1122334/26", solicita: "READECUACIÓN DE POF", establecimiento: "Colegio Secundario N° 15", estado: "LIQUIDACIONES", comentario: "" },
-      { id: crypto.randomUUID(), expediente: "2233445/26", solicita: "CIERRE DE DIVISIONES", establecimiento: "Escuela Primaria N° 200", estado: "FIRMA INT.", comentario: "Revisión final" },
+      { id: crypto.randomUUID(), expediente: "1234567/26", solicita: "CIERRE PROVISORIO DE ESTABLECIMIENTO", establecimiento: "Escuela N° 123", ubicacion: "INICIAL", comentario: "Pendiente de revisión" },
+      { id: crypto.randomUUID(), expediente: "2345678/26", solicita: "APERTURA DE DIVISIONES", establecimiento: "Colegio San Martín", ubicacion: "SECUNDARIO", comentario: "" },
+      { id: crypto.randomUUID(), expediente: "3456789/26", solicita: "CREACIÓN Y LOCALIZACIÓN DE CARGOS", establecimiento: "Instituto Técnico N° 45", ubicacion: "LEGAL Y TÉCNICA", comentario: "En proceso" },
+      { id: crypto.randomUUID(), expediente: "4567890/26", solicita: "CAMBIO DE DENOMINACIÓN", establecimiento: "Escuela Rural N° 78", ubicacion: "DESPACHO", comentario: "" },
+      { id: crypto.randomUUID(), expediente: "5678901/26", solicita: "FUSIÓN DE ESTABLECIMIENTOS", establecimiento: "Jardín de Infantes N° 12", ubicacion: "FIRMA MINISTRO", comentario: "Esperando firma" },
+      { id: crypto.randomUUID(), expediente: "6789012/26", solicita: "AMPLIACIÓN DE ESTRUCTURA CURRICULAR", establecimiento: "Escuela Técnica N° 34", ubicacion: "HACIENDA", comentario: "" },
+      { id: crypto.randomUUID(), expediente: "7890123/26", solicita: "REORGANIZACIÓN DE CARGOS", establecimiento: "Colegio Nacional N° 5", ubicacion: "GESTIÓN", comentario: "Análisis en curso" },
+      { id: crypto.randomUUID(), expediente: "8901234/26", solicita: "CREACIÓN DE ANEXOS", establecimiento: "Escuela Provincial N° 89", ubicacion: "INNOVACIÓN", comentario: "" },
+      { id: crypto.randomUUID(), expediente: "9012345/26", solicita: "CAMBIO DE NIVEL DE JORNADA", establecimiento: "Instituto Superior N° 2", ubicacion: "INFRAESTRUCTURA", comentario: "" },
+      { id: crypto.randomUUID(), expediente: "0123456/26", solicita: "TRASLADO DE ESTABLECIMIENTO EDUCATIVO", establecimiento: "Escuela Especial N° 7", ubicacion: "OBLIGATORIA", comentario: "Documentación completa" },
+      { id: crypto.randomUUID(), expediente: "1122334/26", solicita: "READECUACIÓN DE POF", establecimiento: "Colegio Secundario N° 15", ubicacion: "LIQUIDACIONES", comentario: "" },
+      { id: crypto.randomUUID(), expediente: "2233445/26", solicita: "CIERRE DE DIVISIONES", establecimiento: "Escuela Primaria N° 200", ubicacion: "FIRMA INT.", comentario: "Revisión final" },
     ];
 
     sampleExpedientes.forEach((exp) => {
@@ -154,7 +154,7 @@ export class MemStorage implements IStorage {
 
   async createExpediente(data: InsertExpediente): Promise<Expediente> {
     const id = crypto.randomUUID();
-    const expediente: Expediente = { id, expediente: data.expediente, solicita: data.solicita, establecimiento: data.establecimiento, estado: data.estado, comentario: data.comentario ?? "" };
+    const expediente: Expediente = { id, expediente: data.expediente, solicita: data.solicita, establecimiento: data.establecimiento, ubicacion: data.ubicacion, comentario: data.comentario ?? "" };
     this.expedientes.set(id, expediente);
     return expediente;
   }
@@ -162,7 +162,7 @@ export class MemStorage implements IStorage {
   async updateExpediente(id: string, data: InsertExpediente): Promise<Expediente | undefined> {
     const existing = this.expedientes.get(id);
     if (!existing) return undefined;
-    const updated: Expediente = { id, expediente: data.expediente, solicita: data.solicita, establecimiento: data.establecimiento, estado: data.estado, comentario: data.comentario ?? "" };
+    const updated: Expediente = { id, expediente: data.expediente, solicita: data.solicita, establecimiento: data.establecimiento, ubicacion: data.ubicacion, comentario: data.comentario ?? "" };
     this.expedientes.set(id, updated);
     return updated;
   }
