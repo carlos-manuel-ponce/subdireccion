@@ -35,7 +35,7 @@ export const SOLICITUD_TYPES = [
 
 export type SolicitudType = (typeof SOLICITUD_TYPES)[number];
 
-// Nomenclador de Ubicaciones (12 ubicaciones)
+// Nomenclador de Ubicaciones (13 ubicaciones)
 export const UBICACION_TYPES = [
   "INICIAL",
   "SECUNDARIO",
@@ -49,6 +49,7 @@ export const UBICACION_TYPES = [
   "HACIENDA",
   "FIRMA MINISTRO",
   "FIRMA INT.",
+  "FINALIZADO",
 ] as const;
 
 export type UbicacionType = (typeof UBICACION_TYPES)[number];
