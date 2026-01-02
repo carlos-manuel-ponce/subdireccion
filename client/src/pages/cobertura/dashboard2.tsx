@@ -240,18 +240,19 @@ export default function Dashboard2Page() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="min-w-[130px]">Llamado</TableHead>
-                <TableHead className="min-w-[80px]">Región</TableHead>
-                <TableHead className="min-w-[100px]">Nivel</TableHead>
-                <TableHead className="min-w-[180px]">Responsable</TableHead>
-                <TableHead className="min-w-[120px]">Expediente</TableHead>
-                <TableHead className="min-w-[200px]">Pedido</TableHead>
+                <TableHead className="min-w-[180px]">Establecimiento</TableHead>
+                <TableHead className="min-w-[120px]">Llamado</TableHead>
+                <TableHead className="min-w-[130px]">Región / Localidad</TableHead>
+                <TableHead className="min-w-[110px]">Nivel / Carácter</TableHead>
+                <TableHead className="min-w-[250px]">Descripción</TableHead>
+                <TableHead className="min-w-[180px]">Docente</TableHead>
+                <TableHead className="min-w-[90px]">Habilitación</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredDetalles.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
                     {searchQuery 
                       ? "No se encontraron registros con la búsqueda realizada"
                       : "No hay registros disponibles"}
@@ -264,6 +265,7 @@ export default function Dashboard2Page() {
                     className={index % 2 === 0 ? "bg-background" : "bg-muted/20"}
                     data-testid={`row-detalle-${det.id}`}
                   >
+                    <TableCell className="font-medium">{det.establecimiento}</TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         <div className="text-sm font-medium">{det.llamado}</div>
@@ -274,10 +276,19 @@ export default function Dashboard2Page() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="font-mono text-xs">{det.region}</Badge>
+                      <div className="space-y-0.5">
+                        <Badge variant="outline" className="font-mono text-xs">{det.region}</Badge>
+                        <div className="text-sm">{det.localidad}</div>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-sm">{det.nivel}</div>
+                      <div className="space-y-0.5">
+                        <div className="text-sm">{det.nivel}</div>
+                        <div className="text-xs text-muted-foreground">{det.caracter}</div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm max-w-[300px]">
+                      <div className="line-clamp-3">{det.descripcion}</div>
                     </TableCell>
                     <TableCell>
                       <div className="space-y-0.5">
@@ -286,10 +297,14 @@ export default function Dashboard2Page() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="font-mono text-sm">{det.expediente || "-"}</span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-sm">{det.pedido || "-"}</div>
+                      <Badge 
+                        variant={det.habilitacion === "HABILITADO" ? "default" : "secondary"}
+                        className={det.habilitacion === "HABILITADO" 
+                          ? "bg-green-500/20 text-green-300 border-green-500/30" 
+                          : "bg-amber-500/20 text-amber-300 border-amber-500/30"}
+                      >
+                        {det.habilitacion}
+                      </Badge>
                     </TableCell>
                   </TableRow>
                 ))

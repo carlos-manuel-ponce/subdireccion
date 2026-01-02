@@ -152,8 +152,6 @@ export const coberturaDetalles = pgTable("cobertura_detalles", {
   nombre: text("nombre").notNull(),
   dni: text("dni").notNull(),
   habilitacion: text("habilitacion").notNull(),
-  expediente: text("expediente"),
-  pedido: text("pedido"),
 });
 
 // ==================== SCHEMAS Y TIPOS ====================

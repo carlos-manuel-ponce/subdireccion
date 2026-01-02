@@ -78,12 +78,12 @@ export class MemStorage implements IStorage {
     });
 
     const sampleDetalles: CoberturaDetalle[] = [
-      { id: crypto.randomUUID(), llamado: "Llamado 1/2026", tipo: "SUPLENCIA", fecha: "2026-01-15", juntaClasificacion: "INICIAL Y PRIMARIA", region: "I", localidad: "Capital", establecimiento: "Escuela N° 100", nivel: "PRIMARIO", caracter: "COMÚN", descripcion: "Maestro de Grado", apellido: "GARCÍA", nombre: "MARÍA", dni: "30123456", habilitacion: "HABILITADO", expediente: "COB-001/26", pedido: "Cobertura de cargo vacante" },
-      { id: crypto.randomUUID(), llamado: "Llamado 1/2026", tipo: "SUPLENCIA", fecha: "2026-01-15", juntaClasificacion: "INICIAL Y PRIMARIA", region: "I", localidad: "Capital", establecimiento: "Escuela N° 100", nivel: "INICIAL", caracter: "COMÚN", descripcion: "Maestra de Sala", apellido: "LÓPEZ", nombre: "ANA", dni: "31234567", habilitacion: "HABILITADO", expediente: "COB-002/26", pedido: "Suplencia por licencia" },
-      { id: crypto.randomUUID(), llamado: "Llamado 2/2026", tipo: "INTERINATO", fecha: "2026-01-20", juntaClasificacion: "SECUNDARIA", region: "II", localidad: "Zona Norte", establecimiento: "Colegio N° 200", nivel: "SECUNDARIO", caracter: "TÉCNICO", descripcion: "Profesor de Matemáticas", apellido: "MARTÍNEZ", nombre: "JUAN", dni: "28345678", habilitacion: "EN TRÁMITE", expediente: "COB-003/26", pedido: "Interinato por renuncia" },
-      { id: crypto.randomUUID(), llamado: "Llamado 3/2026", tipo: "TITULAR", fecha: "2026-02-01", juntaClasificacion: "INICIAL Y PRIMARIA", region: "III", localidad: "Zona Sur", establecimiento: "Jardín N° 50", nivel: "INICIAL", caracter: "COMÚN", descripcion: "Maestra de Sala", apellido: "RODRÍGUEZ", nombre: "LAURA", dni: "32456789", habilitacion: "HABILITADO", expediente: "COB-004/26", pedido: "Titularización" },
-      { id: crypto.randomUUID(), llamado: "Llamado 4/2026", tipo: "SUPLENCIA", fecha: "2026-02-10", juntaClasificacion: "SECUNDARIA", region: "IV", localidad: "Zona Este", establecimiento: "Instituto N° 300", nivel: "SECUNDARIO", caracter: "COMÚN", descripcion: "Profesor de Historia", apellido: "FERNÁNDEZ", nombre: "CARLOS", dni: "29567890", habilitacion: "HABILITADO", expediente: "COB-005/26", pedido: "Suplencia por maternidad" },
-      { id: crypto.randomUUID(), llamado: "Llamado 5/2026", tipo: "INTERINATO", fecha: "2026-02-15", juntaClasificacion: "INICIAL Y PRIMARIA", region: "V", localidad: "Zona Oeste", establecimiento: "Escuela N° 150", nivel: "PRIMARIO", caracter: "ESPECIAL", descripcion: "Maestro Integrador", apellido: "GONZÁLEZ", nombre: "PEDRO", dni: "33678901", habilitacion: "HABILITADO", expediente: "COB-006/26", pedido: "Creación de cargo" },
+      { id: crypto.randomUUID(), llamado: "Llamado 1/2026", tipo: "SUPLENCIA", fecha: "2026-01-15", juntaClasificacion: "INICIAL Y PRIMARIA", region: "I", localidad: "Capital", establecimiento: "Escuela N° 100", nivel: "PRIMARIO", caracter: "COMÚN", descripcion: "Maestro de Grado", apellido: "GARCÍA", nombre: "MARÍA", dni: "30123456", habilitacion: "HABILITADO" },
+      { id: crypto.randomUUID(), llamado: "Llamado 1/2026", tipo: "SUPLENCIA", fecha: "2026-01-15", juntaClasificacion: "INICIAL Y PRIMARIA", region: "I", localidad: "Capital", establecimiento: "Escuela N° 100", nivel: "INICIAL", caracter: "COMÚN", descripcion: "Maestra de Sala", apellido: "LÓPEZ", nombre: "ANA", dni: "31234567", habilitacion: "HABILITADO" },
+      { id: crypto.randomUUID(), llamado: "Llamado 2/2026", tipo: "INTERINATO", fecha: "2026-01-20", juntaClasificacion: "SECUNDARIA", region: "II", localidad: "Zona Norte", establecimiento: "Colegio N° 200", nivel: "SECUNDARIO", caracter: "TÉCNICO", descripcion: "Profesor de Matemáticas", apellido: "MARTÍNEZ", nombre: "JUAN", dni: "28345678", habilitacion: "EN TRÁMITE" },
+      { id: crypto.randomUUID(), llamado: "Llamado 3/2026", tipo: "TITULAR", fecha: "2026-02-01", juntaClasificacion: "INICIAL Y PRIMARIA", region: "III", localidad: "Zona Sur", establecimiento: "Jardín N° 50", nivel: "INICIAL", caracter: "COMÚN", descripcion: "Maestra de Sala", apellido: "RODRÍGUEZ", nombre: "LAURA", dni: "32456789", habilitacion: "HABILITADO" },
+      { id: crypto.randomUUID(), llamado: "Llamado 4/2026", tipo: "SUPLENCIA", fecha: "2026-02-10", juntaClasificacion: "SECUNDARIA", region: "IV", localidad: "Zona Este", establecimiento: "Instituto N° 300", nivel: "SECUNDARIO", caracter: "COMÚN", descripcion: "Profesor de Historia", apellido: "FERNÁNDEZ", nombre: "CARLOS", dni: "29567890", habilitacion: "HABILITADO" },
+      { id: crypto.randomUUID(), llamado: "Llamado 5/2026", tipo: "INTERINATO", fecha: "2026-02-15", juntaClasificacion: "INICIAL Y PRIMARIA", region: "V", localidad: "Zona Oeste", establecimiento: "Escuela N° 150", nivel: "PRIMARIO", caracter: "ESPECIAL", descripcion: "Maestro Integrador", apellido: "GONZÁLEZ", nombre: "PEDRO", dni: "33678901", habilitacion: "HABILITADO" },
     ];
 
     sampleDetalles.forEach((det) => {
@@ -375,8 +375,6 @@ export class MemStorage implements IStorage {
       nombre: row.nombre || "",
       dni: row.dni || "",
       habilitacion: row.habilitacion || "",
-      expediente: row.expediente || null,
-      pedido: row.pedido || null,
     }));
   }
 
@@ -403,8 +401,6 @@ export class MemStorage implements IStorage {
       nombre: data.nombre || "",
       dni: data.dni || "",
       habilitacion: data.habilitacion || "",
-      expediente: data.expediente || null,
-      pedido: data.pedido || null,
     };
   }
 
@@ -426,8 +422,6 @@ export class MemStorage implements IStorage {
         nombre: data.nombre,
         dni: data.dni,
         habilitacion: data.habilitacion,
-        expediente: data.expediente,
-        pedido: data.pedido,
       })
       .select()
       .single();
@@ -451,8 +445,6 @@ export class MemStorage implements IStorage {
       nombre: created.nombre || "",
       dni: created.dni || "",
       habilitacion: created.habilitacion || "",
-      expediente: created.expediente || null,
-      pedido: created.pedido || null,
     };
   }
 
@@ -474,8 +466,6 @@ export class MemStorage implements IStorage {
         nombre: data.nombre,
         dni: data.dni,
         habilitacion: data.habilitacion,
-        expediente: data.expediente,
-        pedido: data.pedido,
       })
       .eq("id", parseInt(id))
       .select()
@@ -501,8 +491,6 @@ export class MemStorage implements IStorage {
       nombre: updated.nombre || "",
       dni: updated.dni || "",
       habilitacion: updated.habilitacion || "",
-      expediente: updated.expediente || null,
-      pedido: updated.pedido || null,
     };
   }
 
