@@ -144,10 +144,12 @@ function addPageBorder(doc: InstanceType<typeof PDFDocument>, endY?: number) {
   const pageWidth = 535;
   
   // If endY is provided, use it; otherwise use current position + some padding
-  const borderHeight = endY ? (endY - marginTop + 20) : (doc.y - marginTop + 20);
+  const borderHeight = endY ? (endY - marginTop + 20) : (doc.y - marginTop + 30);
   
+  // Ensure we reset stroke color to black before drawing border
   doc.strokeColor("#000000").lineWidth(1);
   doc.rect(marginLeft, marginTop, pageWidth, borderHeight).stroke();
+  doc.strokeColor("#000000"); // Reset after drawing
 }
 
 // Legacy function for other reports

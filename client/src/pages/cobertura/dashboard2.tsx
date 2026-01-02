@@ -17,6 +17,7 @@ export default function Dashboard2Page() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedEstablecimientos, setSelectedEstablecimientos] = useState<string[]>([]);
+  const [estSearchQuery, setEstSearchQuery] = useState("");
 
   const { data: detalles = [], isLoading } = useQuery<CoberturaDetalle[]>({
     queryKey: ["/api/cobertura/detalles"],
@@ -26,6 +27,12 @@ export default function Dashboard2Page() {
     const establecimientos = Array.from(new Set(detalles.map((det) => det.establecimiento)));
     return establecimientos.sort();
   }, [detalles]);
+
+  const filteredEstablecimientos = useMemo(() => {
+    if (!estSearchQuery.trim()) return uniqueEstablecimientos;
+    const query = estSearchQuery.toLowerCase();
+    return uniqueEstablecimientos.filter((est) => est.toLowerCase().includes(query));
+  }, [uniqueEstablecimientos, estSearchQuery]);
 
   const toggleEstablecimiento = (est: string) => {
     setSelectedEstablecimientos((prev) =>
@@ -149,7 +156,7 @@ export default function Dashboard2Page() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-80 p-0" align="end">
-                <div className="p-3 border-b border-border">
+                <div className="p-3 border-b border-border space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Filtrar por establecimiento</span>
                     {selectedEstablecimientos.length > 0 && (
@@ -158,10 +165,21 @@ export default function Dashboard2Page() {
                       </Button>
                     )}
                   </div>
+                  <div className="relative">
+                    <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="search"
+                      placeholder="Buscar establecimiento..."
+                      value={estSearchQuery}
+                      onChange={(e) => setEstSearchQuery(e.target.value)}
+                      className="pl-8 h-8"
+                      data-testid="input-search-establecimientos"
+                    />
+                  </div>
                 </div>
                 <ScrollArea className="h-64">
                   <div className="p-2 space-y-1">
-                    {uniqueEstablecimientos.map((est) => (
+                    {filteredEstablecimientos.map((est) => (
                       <div
                         key={est}
                         className="flex items-center gap-2 p-2 rounded-md hover-elevate cursor-pointer"
@@ -175,6 +193,11 @@ export default function Dashboard2Page() {
                         <span className="text-sm">{est}</span>
                       </div>
                     ))}
+                    {filteredEstablecimientos.length === 0 && (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        No se encontraron establecimientos
+                      </p>
+                    )}
                   </div>
                 </ScrollArea>
               </PopoverContent>
