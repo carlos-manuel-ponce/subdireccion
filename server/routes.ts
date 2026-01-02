@@ -23,25 +23,20 @@ if (!fs.existsSync(uploadsDir)) {
 
 const logoPath = path.join(process.cwd(), "attached_assets", "logo_ministerio.png");
 
-function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, reportNumber: string, userName: string = "Usuario del Sistema") {
+function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, reportNumber: string, userName: string = "Usuario del Sistema", totalRegistros: number = 0) {
   const marginLeft = 50;
   const pageWidth = 495;
   
-  // Title "INFORME N°" on the left
-  doc.font("Helvetica-Bold").fontSize(22).fillColor("#000000").text(`INFORME N° ${reportNumber}`, marginLeft, 40);
+  // Title "INFORME Nº" on the left (no logo)
+  doc.font("Helvetica-Bold").fontSize(24).fillColor("#000000").text(`INFORME Nº`, marginLeft, 40);
   
-  // Logo on the right
-  if (fs.existsSync(logoPath)) {
-    doc.image(logoPath, marginLeft + pageWidth - 150, 35, { width: 150 });
-  }
-  
-  doc.y = 85;
+  doc.y = 80;
   
   // Info boxes with borders
   const boxY = doc.y;
-  const labelWidth = 60;
+  const labelWidth = 160;
   const valueWidth = pageWidth - labelWidth;
-  const rowHeight = 20;
+  const rowHeight = 18;
   
   // Emisión row
   const now = new Date();
@@ -51,30 +46,36 @@ function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, reportNumb
   doc.strokeColor("#000000").lineWidth(0.5);
   doc.rect(marginLeft, boxY, labelWidth, rowHeight).stroke();
   doc.rect(marginLeft + labelWidth, boxY, valueWidth, rowHeight).stroke();
-  doc.font("Helvetica").fontSize(9).fillColor("#000000").text("Emisión", marginLeft + 5, boxY + 6);
-  doc.text(`${dateStr} - ${timeStr}`, marginLeft + labelWidth + 5, boxY + 6);
+  doc.font("Helvetica").fontSize(9).fillColor("#000000").text("Emisión", marginLeft + 5, boxY + 5);
+  doc.text(`${dateStr} - ${timeStr}`, marginLeft + labelWidth + 5, boxY + 5);
   
   // Usuario row
   doc.rect(marginLeft, boxY + rowHeight, labelWidth, rowHeight).stroke();
   doc.rect(marginLeft + labelWidth, boxY + rowHeight, valueWidth, rowHeight).stroke();
-  doc.text("Usuario", marginLeft + 5, boxY + rowHeight + 6);
-  doc.text(userName, marginLeft + labelWidth + 5, boxY + rowHeight + 6);
+  doc.text("Usuario", marginLeft + 5, boxY + rowHeight + 5);
+  doc.text(userName, marginLeft + labelWidth + 5, boxY + rowHeight + 5);
   
-  doc.y = boxY + rowHeight * 2 + 20;
+  // Total Registros Encontrados row
+  doc.rect(marginLeft, boxY + rowHeight * 2, labelWidth, rowHeight).stroke();
+  doc.rect(marginLeft + labelWidth, boxY + rowHeight * 2, valueWidth, rowHeight).stroke();
+  doc.text("Total Registros Encontrados", marginLeft + 5, boxY + rowHeight * 2 + 5);
+  doc.text(String(totalRegistros), marginLeft + labelWidth + 5, boxY + rowHeight * 2 + 5);
+  
+  doc.y = boxY + rowHeight * 3 + 25;
 }
 
 function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establecimiento: string, fields: { label: string; value: string }[]) {
   const marginLeft = 50;
   const pageWidth = 495;
-  const labelWidth = 150;
+  const labelWidth = 160;
   const valueWidth = pageWidth - labelWidth;
-  const headerHeight = 22;
-  const minRowHeight = 20;
+  const headerHeight = 20;
+  const minRowHeight = 18;
   
   // Calculate dynamic heights for each field based on text content
   const fieldHeights = fields.map((field) => {
     const textHeight = doc.font("Helvetica").fontSize(9).heightOfString(field.value || " ", { width: valueWidth - 10 });
-    return Math.max(minRowHeight, textHeight + 10);
+    return Math.max(minRowHeight, textHeight + 8);
   });
   
   const totalContentHeight = fieldHeights.reduce((sum, h) => sum + h, 0);
@@ -88,9 +89,10 @@ function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establec
   
   const startY = doc.y;
   
-  // Establecimiento header with dark background
-  doc.fillColor("#333333").rect(marginLeft, startY, pageWidth, headerHeight).fill();
-  doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(10).text(establecimiento, marginLeft, startY + 6, { width: pageWidth, align: "center" });
+  // Establecimiento header with light gray background and border
+  doc.fillColor("#e8e8e8").rect(marginLeft, startY, pageWidth, headerHeight).fill();
+  doc.strokeColor("#000000").lineWidth(0.5).rect(marginLeft, startY, pageWidth, headerHeight).stroke();
+  doc.fillColor("#000000").font("Helvetica-Bold").fontSize(9).text(establecimiento, marginLeft, startY + 5, { width: pageWidth, align: "center" });
   
   let currentY = startY + headerHeight;
   
@@ -100,19 +102,18 @@ function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establec
   fields.forEach((field, index) => {
     const rowHeight = fieldHeights[index];
     
-    // Label cell with light gray background
-    doc.fillColor("#f5f5f5").rect(marginLeft, currentY, labelWidth, rowHeight).fill();
+    // Label cell (no fill, just border)
     doc.strokeColor("#000000").rect(marginLeft, currentY, labelWidth, rowHeight).stroke();
-    doc.fillColor("#000000").font("Helvetica-Bold").fontSize(9).text(field.label, marginLeft + 5, currentY + 6, { width: labelWidth - 10 });
+    doc.fillColor("#000000").font("Helvetica").fontSize(9).text(field.label, marginLeft + 5, currentY + 5, { width: labelWidth - 10 });
     
     // Value cell
     doc.strokeColor("#000000").rect(marginLeft + labelWidth, currentY, valueWidth, rowHeight).stroke();
-    doc.fillColor("#000000").font("Helvetica").fontSize(9).text(field.value || "", marginLeft + labelWidth + 5, currentY + 6, { width: valueWidth - 10 });
+    doc.fillColor("#000000").font("Helvetica").fontSize(9).text(field.value || "", marginLeft + labelWidth + 5, currentY + 5, { width: valueWidth - 10 });
     
     currentY += rowHeight;
   });
   
-  doc.y = currentY + 15;
+  doc.y = currentY + 20;
 }
 
 function addPDFFooter(doc: InstanceType<typeof PDFDocument>) {
@@ -527,16 +528,17 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
       // Generate report number based on timestamp
       const reportNumber = Date.now().toString().slice(-6);
-      createCoberturaHeader(doc, reportNumber, userName || "Usuario del Sistema");
+      const totalRegistros = detalles ? detalles.length : 0;
+      createCoberturaHeader(doc, reportNumber, userName || "Usuario del Sistema", totalRegistros);
 
       if (detalles && detalles.length > 0) {
         detalles.forEach((detalle) => {
           const fields = [
             { label: "LLAMADO", value: `${detalle.llamado} | Tipo: ${detalle.tipo} | Fecha: ${detalle.fecha}` },
-            { label: "REGION LOCALIDAD", value: `${detalle.region} / ${detalle.localidad}` },
-            { label: "NIVEL CARACTER", value: `${detalle.nivel} / ${detalle.caracter}` },
+            { label: "REGION / LOCALIDAD", value: `${detalle.region} / ${detalle.localidad}` },
+            { label: "NIVEL / CARACTER", value: `${detalle.nivel} / ${detalle.caracter}` },
             { label: "DESCRIPCION", value: detalle.descripcion || "" },
-            { label: "DOCENTE HABILITACION", value: `${detalle.apellido}, ${detalle.nombre} - DNI: ${detalle.dni} | ${detalle.habilitacion}` },
+            { label: "DOCENTE / HABILITACION", value: `${detalle.apellido}, ${detalle.nombre} - DNI: ${detalle.dni} | ${detalle.habilitacion}` },
           ];
           
           drawEstablecimientoCard(doc, detalle.establecimiento, fields);
