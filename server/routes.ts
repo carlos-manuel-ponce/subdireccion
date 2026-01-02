@@ -23,48 +23,31 @@ if (!fs.existsSync(uploadsDir)) {
 
 const logoPath = path.join(process.cwd(), "attached_assets", "logo_ministerio.png");
 
-function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, reportNumber: string, userName: string = "Usuario del Sistema", totalRegistros: number = 0) {
+function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, moduleName: string, userName: string = "Usuario del Sistema", totalRegistros: number = 0) {
   const marginLeft = 50;
   const pageWidth = 495;
   
-  // Title "INFORME Nº" on the left (no logo)
-  doc.font("Helvetica-Bold").fontSize(24).fillColor("#000000").text(`INFORME Nº`, marginLeft, 40);
+  // Title "INFORME DE [MODULE]" on the left (no logo)
+  doc.font("Helvetica-Bold").fontSize(20).fillColor("#000000").text(`INFORME DE ${moduleName}`, marginLeft, 40);
   
-  doc.y = 80;
+  doc.y = 75;
   
-  // Info boxes with borders
-  const boxY = doc.y;
-  const labelWidth = 160;
-  const valueWidth = pageWidth - labelWidth;
-  const rowHeight = 18;
-  
-  // Emisión row
+  // Emisión and Usuario on same line
   const now = new Date();
   const dateStr = now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
   const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
   
-  doc.strokeColor("#000000").lineWidth(0.5);
-  doc.rect(marginLeft, boxY, labelWidth, rowHeight).stroke();
-  doc.rect(marginLeft + labelWidth, boxY, valueWidth, rowHeight).stroke();
-  doc.font("Helvetica").fontSize(9).fillColor("#000000").text("Emisión", marginLeft + 5, boxY + 5);
-  doc.text(`${dateStr} - ${timeStr}`, marginLeft + labelWidth + 5, boxY + 5);
+  doc.font("Helvetica").fontSize(9).fillColor("#000000");
+  doc.text(`Emisión: ${dateStr} - ${timeStr}`, marginLeft, doc.y);
+  doc.text(`Usuario: ${userName}`, marginLeft + 250, doc.y - 11);
   
-  // Usuario row
-  doc.rect(marginLeft, boxY + rowHeight, labelWidth, rowHeight).stroke();
-  doc.rect(marginLeft + labelWidth, boxY + rowHeight, valueWidth, rowHeight).stroke();
-  doc.text("Usuario", marginLeft + 5, boxY + rowHeight + 5);
-  doc.text(userName, marginLeft + labelWidth + 5, boxY + rowHeight + 5);
+  // Registros Encontrados on next line
+  doc.text(`Registros Encontrados: ${totalRegistros}`, marginLeft, doc.y + 5);
   
-  // Total Registros Encontrados row
-  doc.rect(marginLeft, boxY + rowHeight * 2, labelWidth, rowHeight).stroke();
-  doc.rect(marginLeft + labelWidth, boxY + rowHeight * 2, valueWidth, rowHeight).stroke();
-  doc.text("Total Registros Encontrados", marginLeft + 5, boxY + rowHeight * 2 + 5);
-  doc.text(String(totalRegistros), marginLeft + labelWidth + 5, boxY + rowHeight * 2 + 5);
-  
-  doc.y = boxY + rowHeight * 3 + 25;
+  doc.y = doc.y + 25;
 }
 
-function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establecimiento: string, fields: { label: string; value: string }[]) {
+function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establecimiento: string, fields: { label: string; value: string }[], recordNumber?: number) {
   const marginLeft = 50;
   const pageWidth = 495;
   const labelWidth = 160;
@@ -79,12 +62,18 @@ function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establec
   });
   
   const totalContentHeight = fieldHeights.reduce((sum, h) => sum + h, 0);
-  const cardHeight = headerHeight + totalContentHeight;
+  const cardHeight = headerHeight + totalContentHeight + 20; // Extra space for record number
   
   // Check if we need a new page
   if (doc.y + cardHeight > 760) {
     doc.addPage();
     doc.y = 50;
+  }
+  
+  // Record number above the card
+  if (recordNumber) {
+    doc.font("Helvetica-Bold").fontSize(9).fillColor("#000000").text(String(recordNumber), marginLeft, doc.y);
+    doc.y += 5;
   }
   
   const startY = doc.y;
@@ -113,7 +102,7 @@ function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establec
     currentY += rowHeight;
   });
   
-  doc.y = currentY + 20;
+  doc.y = currentY + 15;
 }
 
 function addPDFFooter(doc: InstanceType<typeof PDFDocument>) {
@@ -526,13 +515,12 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
       doc.pipe(res);
 
-      // Generate report number based on timestamp
-      const reportNumber = Date.now().toString().slice(-6);
+      // Generate report with module name
       const totalRegistros = detalles ? detalles.length : 0;
-      createCoberturaHeader(doc, reportNumber, userName || "Usuario del Sistema", totalRegistros);
+      createCoberturaHeader(doc, "COBERTURA DE CARGOS", userName || "Usuario del Sistema", totalRegistros);
 
       if (detalles && detalles.length > 0) {
-        detalles.forEach((detalle) => {
+        detalles.forEach((detalle, index) => {
           const fields = [
             { label: "LLAMADO", value: `${detalle.llamado} | Tipo: ${detalle.tipo} | Fecha: ${detalle.fecha}` },
             { label: "REGION / LOCALIDAD", value: `${detalle.region} / ${detalle.localidad}` },
@@ -541,7 +529,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
             { label: "DOCENTE / HABILITACION", value: `${detalle.apellido}, ${detalle.nombre} - DNI: ${detalle.dni} | ${detalle.habilitacion}` },
           ];
           
-          drawEstablecimientoCard(doc, detalle.establecimiento, fields);
+          drawEstablecimientoCard(doc, detalle.establecimiento, fields, index + 1);
         });
         
         // Add footer on last page
