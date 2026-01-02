@@ -136,16 +136,31 @@ export class MemStorage implements IStorage {
       console.error("Error fetching expedientes:", error);
       return [];
     }
-    return data || [];
+    return (data || []).map((row: any) => ({
+      id: String(row.id),
+      expediente: row.expediente,
+      solicita: row.solicitud,
+      establecimiento: row.establecimiento,
+      ubicacion: row.ubicacion,
+      comentario: row.comentario || "",
+    }));
   }
 
   async getExpediente(id: string): Promise<Expediente | undefined> {
-    const { data, error } = await supabase.from("creaciones").select("*").eq("id", id).single();
+    const { data, error } = await supabase.from("creaciones").select("*").eq("id", parseInt(id)).single();
     if (error) {
       console.error("Error fetching expediente:", error);
       return undefined;
     }
-    return data || undefined;
+    if (!data) return undefined;
+    return {
+      id: String(data.id),
+      expediente: data.expediente,
+      solicita: data.solicitud,
+      establecimiento: data.establecimiento,
+      ubicacion: data.ubicacion,
+      comentario: data.comentario || "",
+    };
   }
 
   async createExpediente(data: InsertExpediente): Promise<Expediente> {
@@ -153,7 +168,7 @@ export class MemStorage implements IStorage {
       .from("creaciones")
       .insert({
         expediente: data.expediente,
-        solicita: data.solicita,
+        solicitud: data.solicita,
         establecimiento: data.establecimiento,
         ubicacion: data.ubicacion,
         comentario: data.comentario ?? "",
@@ -164,7 +179,14 @@ export class MemStorage implements IStorage {
       console.error("Error creating expediente:", error);
       throw new Error("Failed to create expediente");
     }
-    return created;
+    return {
+      id: String(created.id),
+      expediente: created.expediente,
+      solicita: created.solicitud,
+      establecimiento: created.establecimiento,
+      ubicacion: created.ubicacion,
+      comentario: created.comentario || "",
+    };
   }
 
   async updateExpediente(id: string, data: InsertExpediente): Promise<Expediente | undefined> {
@@ -172,23 +194,31 @@ export class MemStorage implements IStorage {
       .from("creaciones")
       .update({
         expediente: data.expediente,
-        solicita: data.solicita,
+        solicitud: data.solicita,
         establecimiento: data.establecimiento,
         ubicacion: data.ubicacion,
         comentario: data.comentario ?? "",
       })
-      .eq("id", id)
+      .eq("id", parseInt(id))
       .select()
       .single();
     if (error) {
       console.error("Error updating expediente:", error);
       return undefined;
     }
-    return updated || undefined;
+    if (!updated) return undefined;
+    return {
+      id: String(updated.id),
+      expediente: updated.expediente,
+      solicita: updated.solicitud,
+      establecimiento: updated.establecimiento,
+      ubicacion: updated.ubicacion,
+      comentario: updated.comentario || "",
+    };
   }
 
   async deleteExpediente(id: string): Promise<boolean> {
-    const { error } = await supabase.from("creaciones").delete().eq("id", id);
+    const { error } = await supabase.from("creaciones").delete().eq("id", parseInt(id));
     if (error) {
       console.error("Error deleting expediente:", error);
       return false;
