@@ -43,9 +43,9 @@ function createPDFFooter(doc: InstanceType<typeof PDFDocument>, userName: string
   const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
   
   doc.moveDown(2);
-  doc.font("Times-Roman").fontSize(9).text("Documento generado automáticamente por Subdirección Cobertura de Cargos", 50, doc.y, { align: "center", width: 495 });
   doc.font("Times-Roman").fontSize(9).text(`Emisión: ${dateStr}, ${timeStr}`, 50, doc.y, { align: "center", width: 495 });
   doc.font("Times-Roman").fontSize(9).text(`Usuario: ${userName}`, 50, doc.y, { align: "center", width: 495 });
+  doc.font("Times-Roman").fontSize(9).text("Documento generado automáticamente por Subdirección Cobertura de Cargos", 50, doc.y, { align: "center", width: 495 });
 }
 
 function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: string; value: string }[], title: string) {
