@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { MODULE_TYPES, type ModuleType } from "@shared/schema";
-import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
 
 export default function Login() {
   const [, setLocation] = useLocation();
@@ -57,16 +56,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-lg space-y-6">
-          <div className="text-center">
-            <img 
-              src={logoUrl} 
-              alt="Gobierno de la Provincia - Ministerio de Educación" 
-              className="h-14 mx-auto"
-              data-testid="img-logo"
-            />
-          </div>
-
+        <div className="w-full max-w-lg">
           <Card className="p-6">
             <div className="space-y-6">
               <div className="text-center space-y-2">

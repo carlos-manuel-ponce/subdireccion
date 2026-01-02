@@ -21,6 +21,35 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
+const logoPath = path.join(process.cwd(), "attached_assets", "LOGO_BLANCO_1767308770849.png");
+
+function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string, subtitle?: string) {
+  if (fs.existsSync(logoPath)) {
+    doc.image(logoPath, 50, 40, { height: 50 });
+  }
+  
+  doc.font("Times-Bold").fontSize(16).text(title, 50, 50, { align: "center" });
+  doc.moveDown(0.3);
+  doc.font("Times-Roman").fontSize(11).text("SUBDIRECCIÓN COBERTURA DE CARGOS", { align: "center" });
+  doc.fontSize(10).text("Dirección Gestión Educativa", { align: "center" });
+  doc.moveDown(0.5);
+  doc.fontSize(10).text(`Fecha de emisión: ${new Date().toLocaleDateString("es-AR", { day: "2-digit", month: "long", year: "numeric" })}`, { align: "center" });
+  
+  if (subtitle) {
+    doc.moveDown(0.3);
+    doc.font("Times-Bold").fontSize(11).text(subtitle, { align: "center" });
+  }
+  
+  doc.moveDown();
+  doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+  doc.moveDown();
+}
+
+function createPDFFooter(doc: InstanceType<typeof PDFDocument>) {
+  doc.moveDown(2);
+  doc.font("Times-Italic").fontSize(8).text("Documento generado automáticamente por el Sistema de Gestión - Subdirección Cobertura de Cargos", { align: "center" });
+}
+
 const multerStorage = multer.diskStorage({
   destination: (_req, _file, cb) => {
     cb(null, uploadsDir);
@@ -124,46 +153,43 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     try {
       const { expedientes } = req.body as { expedientes: { expediente: string; solicita: string; establecimiento: string; estado: string; comentario: string }[] };
 
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument({ margin: 50, size: "A4" });
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename=informe-creaciones-${Date.now()}.pdf`);
 
       doc.pipe(res);
 
-      doc.fontSize(18).text("INFORME DE CREACIONES", { align: "center" });
-      doc.moveDown();
-      doc.fontSize(12).text(`Fecha de generación: ${new Date().toLocaleDateString("es-AR")}`, { align: "center" });
-      doc.moveDown();
-      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-      doc.moveDown();
+      createPDFHeader(doc, "INFORME DE CREACIONES");
 
       if (expedientes && expedientes.length > 0) {
-        doc.fontSize(12).text(`Total de expedientes: ${expedientes.length}`, { align: "left" });
+        doc.font("Times-Bold").fontSize(11).text(`Total de expedientes: ${expedientes.length}`, { align: "left" });
         doc.moveDown();
 
         expedientes.forEach((exp, index) => {
-          if (doc.y > 700) {
+          if (doc.y > 720) {
             doc.addPage();
           }
 
-          doc.fontSize(10)
-            .text(`${index + 1}. Expediente: ${exp.expediente}`, { continued: false })
-            .text(`   Solicita: ${exp.solicita}`)
-            .text(`   Establecimiento: ${exp.establecimiento}`)
-            .text(`   Estado: ${exp.estado}`)
-            .text(`   Comentario: ${exp.comentario || "Sin comentario"}`);
+          doc.font("Times-Bold").fontSize(10).text(`${index + 1}. Expediente N° ${exp.expediente}`, { underline: true });
+          doc.font("Times-Roman").fontSize(10);
+          doc.moveDown(0.3);
+          doc.text(`Tipo de Solicitud: ${exp.solicita}`);
+          doc.text(`Establecimiento: ${exp.establecimiento}`);
+          doc.text(`Estado Actual: ${exp.estado}`);
+          if (exp.comentario) {
+            doc.text(`Observaciones: ${exp.comentario}`);
+          }
 
           doc.moveDown(0.5);
-          doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+          doc.strokeColor("#cccccc").moveTo(50, doc.y).lineTo(545, doc.y).stroke().strokeColor("#000000");
           doc.moveDown(0.5);
         });
       } else {
-        doc.text("No se encontraron expedientes para los filtros aplicados.");
+        doc.font("Times-Roman").fontSize(10).text("No se encontraron expedientes para los filtros aplicados.");
       }
 
-      doc.moveDown(2);
-      doc.fontSize(8).text("Subdirección Cobertura de Cargos - Dirección Gestión Educativa", { align: "center" });
+      createPDFFooter(doc);
 
       doc.end();
     } catch (error) {
@@ -350,57 +376,44 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     try {
       const { establecimiento, detalles } = req.body as { establecimiento?: string; detalles: CoberturaDetalle[] };
 
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument({ margin: 50, size: "A4" });
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename=informe-cobertura-${Date.now()}.pdf`);
 
       doc.pipe(res);
 
-      // Header
-      doc.fontSize(18).text("INFORME DE COBERTURA DE CARGOS", { align: "center" });
-      doc.moveDown();
-      doc.fontSize(12).text(`Fecha de generación: ${new Date().toLocaleDateString("es-AR")}`, { align: "center" });
+      createPDFHeader(doc, "INFORME DE COBERTURA DE CARGOS", establecimiento ? `Establecimiento: ${establecimiento}` : undefined);
 
-      if (establecimiento) {
-        doc.moveDown();
-        doc.fontSize(14).text(`Establecimiento: ${establecimiento}`, { align: "left" });
-      }
-
-      doc.moveDown();
-      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-      doc.moveDown();
-
-      // Data table
       if (detalles && detalles.length > 0) {
-        doc.fontSize(12).text(`Total de registros: ${detalles.length}`, { align: "left" });
+        doc.font("Times-Bold").fontSize(11).text(`Total de registros: ${detalles.length}`, { align: "left" });
         doc.moveDown();
 
         detalles.forEach((detalle, index) => {
-          if (doc.y > 700) {
+          if (doc.y > 720) {
             doc.addPage();
           }
 
-          doc.fontSize(10)
-            .text(`${index + 1}. ${detalle.establecimiento}`, { continued: false })
-            .text(`   Llamado: ${detalle.llamado} | Tipo: ${detalle.tipo} | Fecha: ${detalle.fecha}`)
-            .text(`   Región: ${detalle.region} | Localidad: ${detalle.localidad}`)
-            .text(`   Nivel: ${detalle.nivel} | Carácter: ${detalle.caracter}`)
-            .text(`   Descripción: ${detalle.descripcion}`)
-            .text(`   Docente: ${detalle.apellido}, ${detalle.nombre} - DNI: ${detalle.dni}`)
-            .text(`   Habilitación: ${detalle.habilitacion}`);
+          doc.font("Times-Bold").fontSize(10).text(`${index + 1}. ${detalle.establecimiento}`, { underline: true });
+          doc.font("Times-Roman").fontSize(10);
+          doc.moveDown(0.3);
+          doc.text(`Llamado: ${detalle.llamado}  |  Tipo: ${detalle.tipo}  |  Fecha: ${detalle.fecha}`);
+          doc.text(`Región: ${detalle.region}  |  Localidad: ${detalle.localidad}`);
+          doc.text(`Nivel: ${detalle.nivel}  |  Carácter: ${detalle.caracter}`);
+          doc.text(`Descripción: ${detalle.descripcion}`);
+          doc.font("Times-Bold").text(`Docente: ${detalle.apellido}, ${detalle.nombre}`, { continued: true });
+          doc.font("Times-Roman").text(`  -  DNI: ${detalle.dni}`);
+          doc.text(`Habilitación: ${detalle.habilitacion}`);
 
           doc.moveDown(0.5);
-          doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+          doc.strokeColor("#cccccc").moveTo(50, doc.y).lineTo(545, doc.y).stroke().strokeColor("#000000");
           doc.moveDown(0.5);
         });
       } else {
-        doc.text("No se encontraron registros para los filtros aplicados.");
+        doc.font("Times-Roman").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
       }
 
-      // Footer
-      doc.moveDown(2);
-      doc.fontSize(8).text("Subdirección Cobertura de Cargos - Dirección Gestión Educativa", { align: "center" });
+      createPDFFooter(doc);
 
       doc.end();
     } catch (error) {
@@ -423,51 +436,47 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     try {
       const { registros } = req.body as { registros: TitularizacionRegistro[] };
 
-      const doc = new PDFDocument({ margin: 50 });
+      const doc = new PDFDocument({ margin: 50, size: "A4" });
 
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader("Content-Disposition", `attachment; filename=informe-titularizaciones-${Date.now()}.pdf`);
 
       doc.pipe(res);
 
-      // Header
-      doc.fontSize(18).text("INFORME DE TITULARIZACIONES", { align: "center" });
-      doc.moveDown();
-      doc.fontSize(12).text(`Fecha de generación: ${new Date().toLocaleDateString("es-AR")}`, { align: "center" });
-      doc.moveDown();
-      doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-      doc.moveDown();
+      createPDFHeader(doc, "INFORME DE TITULARIZACIONES");
 
-      // Data table
       if (registros && registros.length > 0) {
-        doc.fontSize(12).text(`Total de registros: ${registros.length}`, { align: "left" });
+        doc.font("Times-Bold").fontSize(11).text(`Total de registros: ${registros.length}`, { align: "left" });
         doc.moveDown();
 
         registros.forEach((reg, index) => {
-          if (doc.y > 700) {
+          if (doc.y > 720) {
             doc.addPage();
           }
 
-          doc.fontSize(10)
-            .text(`${index + 1}. Expediente: ${reg.expediente}`, { continued: false })
-            .text(`   Docente: ${reg.apellido}, ${reg.nombre} - DNI: ${reg.dni}`)
-            .text(`   Establecimiento: ${reg.establecimiento}`)
-            .text(`   Localidad: ${reg.localidad} | Departamento: ${reg.departamento}`)
-            .text(`   Junta de Clasificación: ${reg.juntaClasificacion}`)
-            .text(`   Titularizar en: ${reg.titularizarEn}`)
-            .text(`   Renuncia a: ${reg.renunciaA || "N/A"}`);
+          doc.font("Times-Bold").fontSize(10).text(`${index + 1}. Expediente N° ${reg.expediente}`, { underline: true });
+          doc.font("Times-Roman").fontSize(10);
+          doc.moveDown(0.3);
+          doc.font("Times-Bold").text(`Docente: ${reg.apellido}, ${reg.nombre}`, { continued: true });
+          doc.font("Times-Roman").text(`  -  DNI: ${reg.dni}`);
+          doc.text(`Establecimiento: ${reg.establecimiento}`);
+          doc.text(`Localidad: ${reg.localidad}  |  Departamento: ${reg.departamento}`);
+          doc.text(`Junta de Clasificación: ${reg.juntaClasificacion}`);
+          doc.font("Times-Bold").text(`Titularizar en: ${reg.titularizarEn}`);
+          doc.font("Times-Roman");
+          if (reg.renunciaA) {
+            doc.text(`Renuncia a: ${reg.renunciaA}`);
+          }
 
           doc.moveDown(0.5);
-          doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
+          doc.strokeColor("#cccccc").moveTo(50, doc.y).lineTo(545, doc.y).stroke().strokeColor("#000000");
           doc.moveDown(0.5);
         });
       } else {
-        doc.text("No se encontraron registros para los filtros aplicados.");
+        doc.font("Times-Roman").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
       }
 
-      // Footer
-      doc.moveDown(2);
-      doc.fontSize(8).text("Subdirección Cobertura de Cargos - Dirección Gestión Educativa", { align: "center" });
+      createPDFFooter(doc);
 
       doc.end();
     } catch (error) {
