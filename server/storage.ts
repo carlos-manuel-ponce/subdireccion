@@ -248,7 +248,7 @@ export class MemStorage implements IStorage {
     return (data || []).map((row: any) => ({
       id: String(row.id),
       llamado: row.llamado || "",
-      juntaClasificacion: row["junta de clasificacion"] || "",
+      juntaClasificacion: row.junta_clasificacion || "",
       tipo: row.tipo || "",
       fecha: row.fecha || "",
       establecimientos: Number(row.establecimiento) || 0,
@@ -268,7 +268,7 @@ export class MemStorage implements IStorage {
     return {
       id: String(data.id),
       llamado: data.llamado || "",
-      juntaClasificacion: data["junta de clasificacion"] || "",
+      juntaClasificacion: data.junta_clasificacion || "",
       tipo: data.tipo || "",
       fecha: data.fecha || "",
       establecimientos: Number(data.establecimiento) || 0,
@@ -283,7 +283,7 @@ export class MemStorage implements IStorage {
       .from("llamados_cobertura")
       .insert({
         llamado: data.llamado,
-        "junta de clasificacion": data.juntaClasificacion,
+        junta_clasificacion: data.juntaClasificacion,
         tipo: data.tipo,
         fecha: data.fecha,
         establecimiento: data.establecimientos ?? 0,
@@ -300,13 +300,13 @@ export class MemStorage implements IStorage {
     return {
       id: String(created.id),
       llamado: created.llamado || "",
-      juntaClasificacion: created["junta de clasificacion"] || "",
+      juntaClasificacion: created.junta_clasificacion || "",
       tipo: created.tipo || "",
       fecha: created.fecha || "",
-      establecimientos: created.establecimiento || 0,
-      coberturas: created.vacantes || 0,
-      postulantes: created.postulantes || 0,
-      promedio: created.promedio || 0,
+      establecimientos: Number(created.establecimiento) || 0,
+      coberturas: Number(created.vacantes) || 0,
+      postulantes: Number(created.postulantes) || 0,
+      promedio: Number(created.promedio) || 0,
     };
   }
 
@@ -315,7 +315,7 @@ export class MemStorage implements IStorage {
       .from("llamados_cobertura")
       .update({
         llamado: data.llamado,
-        "junta de clasificacion": data.juntaClasificacion,
+        junta_clasificacion: data.juntaClasificacion,
         tipo: data.tipo,
         fecha: data.fecha,
         establecimiento: data.establecimientos ?? 0,
@@ -334,13 +334,13 @@ export class MemStorage implements IStorage {
     return {
       id: String(updated.id),
       llamado: updated.llamado || "",
-      juntaClasificacion: updated["junta de clasificacion"] || "",
+      juntaClasificacion: updated.junta_clasificacion || "",
       tipo: updated.tipo || "",
       fecha: updated.fecha || "",
-      establecimientos: updated.establecimiento || 0,
-      coberturas: updated.vacantes || 0,
-      postulantes: updated.postulantes || 0,
-      promedio: updated.promedio || 0,
+      establecimientos: Number(updated.establecimiento) || 0,
+      coberturas: Number(updated.vacantes) || 0,
+      postulantes: Number(updated.postulantes) || 0,
+      promedio: Number(updated.promedio) || 0,
     };
   }
 
