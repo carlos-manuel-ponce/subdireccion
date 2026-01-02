@@ -106,14 +106,25 @@ function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establec
 }
 
 function addPDFFooter(doc: InstanceType<typeof PDFDocument>) {
-  const pageHeight = 842; // A4 height
   const marginLeft = 50;
   const pageWidth = 495;
   
+  // Add footer right after the last content
+  doc.moveDown(1);
   doc.font("Helvetica").fontSize(8).fillColor("#666666").text(
     "Documento generado automaticamente por Subdirección Cobertura de Cargos",
-    marginLeft, pageHeight - 40, { width: pageWidth, align: "center" }
+    marginLeft, doc.y, { width: pageWidth, align: "center" }
   );
+}
+
+function addPageBorder(doc: InstanceType<typeof PDFDocument>) {
+  const marginLeft = 30;
+  const marginTop = 25;
+  const pageWidth = 535;
+  const pageHeight = 792;
+  
+  doc.strokeColor("#000000").lineWidth(1);
+  doc.rect(marginLeft, marginTop, pageWidth, pageHeight).stroke();
 }
 
 // Legacy function for other reports
@@ -514,6 +525,14 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       res.setHeader("Content-Disposition", `attachment; filename=informe-cobertura-${Date.now()}.pdf`);
 
       doc.pipe(res);
+      
+      // Add page border on first page
+      addPageBorder(doc);
+      
+      // Add page border on new pages
+      doc.on("pageAdded", () => {
+        addPageBorder(doc);
+      });
 
       // Generate report with module name
       const totalRegistros = detalles ? detalles.length : 0;
@@ -532,7 +551,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
           drawEstablecimientoCard(doc, detalle.establecimiento, fields, index + 1);
         });
         
-        // Add footer on last page
+        // Add footer right after the last card
         addPDFFooter(doc);
       } else {
         doc.font("Helvetica").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
