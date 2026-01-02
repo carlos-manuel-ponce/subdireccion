@@ -230,7 +230,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
         expedientes.forEach((exp, index) => {
           const fields = [
-            { label: "Tipo de Solicitud", value: exp.solicita },
+            { label: "Solicitud", value: exp.solicita },
             { label: "Establecimiento", value: exp.establecimiento },
             { label: "Ubicación", value: exp.ubicacion },
           ];
