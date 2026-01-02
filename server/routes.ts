@@ -44,22 +44,35 @@ function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, moduleName
   
   doc.y = doc.y + disclaimerHeight + 8;
   
-  // Info box with border for Emisión, Usuario, Registros
+  // Registros Encontrados - between disclaimer and first table
+  doc.font("Helvetica").fontSize(9).fillColor("#000000");
+  doc.text(`Registros Encontrados:  ${totalRegistros}`, marginLeft, doc.y);
+  
+  doc.y = doc.y + 15;
+}
+
+function addPDFFooterWithInfo(doc: InstanceType<typeof PDFDocument>, userName: string = "Usuario del Sistema") {
+  const marginLeft = 50;
+  const pageWidth = 495;
+  
   const now = new Date();
   const dateStr = now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
   const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
   
-  const infoBoxHeight = 35;
-  const infoBoxY = doc.y;
+  doc.moveDown(1);
   
-  doc.strokeColor("#000000").lineWidth(0.5).rect(marginLeft, infoBoxY, pageWidth, infoBoxHeight).stroke();
-  
+  // Emisión and Usuario on left side (no border)
   doc.font("Helvetica").fontSize(9).fillColor("#000000");
-  doc.text(`Emision:  ${dateStr} - ${timeStr}`, marginLeft + 8, infoBoxY + 8);
-  doc.text(`Usuario:  ${userName}`, marginLeft + 280, infoBoxY + 8);
-  doc.text(`Registros Encontrados:  ${totalRegistros}`, marginLeft + 8, infoBoxY + 20);
+  doc.text(`Emision:  ${dateStr} - ${timeStr}`, marginLeft, doc.y);
+  doc.text(`Usuario:  ${userName}`, marginLeft, doc.y + 2);
   
-  doc.y = infoBoxY + infoBoxHeight + 10;
+  doc.moveDown(1);
+  
+  // Centered footer text
+  doc.font("Helvetica").fontSize(8).fillColor("#666666").text(
+    "Documento generado automaticamente por Subdirección Cobertura de Cargos.",
+    marginLeft, doc.y, { width: pageWidth, align: "center" }
+  );
 }
 
 function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establecimiento: string, fields: { label: string; value: string }[]) {
@@ -337,10 +350,10 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
           drawEstablecimientoCard(doc, exp.establecimiento, fields);
         });
         
-        addPDFFooter(doc);
+        addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       } else {
         doc.font("Helvetica").fontSize(10).text("No se encontraron expedientes para los filtros aplicados.");
-        addPDFFooter(doc);
+        addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       }
       
       // Add page border at the end, sized to content
@@ -555,11 +568,11 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
           drawEstablecimientoCard(doc, detalle.establecimiento, fields);
         });
         
-        // Add footer right after the last card
-        addPDFFooter(doc);
+        // Add footer with info
+        addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       } else {
         doc.font("Helvetica").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
-        addPDFFooter(doc);
+        addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       }
       
       // Add page border at the end, sized to content
@@ -610,10 +623,10 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
           drawEstablecimientoCard(doc, reg.establecimiento, fields);
         });
         
-        addPDFFooter(doc);
+        addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       } else {
         doc.font("Helvetica").fontSize(10).text("No se encontraron registros para los filtros aplicados.");
-        addPDFFooter(doc);
+        addPDFFooterWithInfo(doc, userName || "Usuario del Sistema");
       }
       
       // Add page border at the end, sized to content
