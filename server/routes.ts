@@ -24,36 +24,52 @@ if (!fs.existsSync(uploadsDir)) {
 const logoPath = path.join(process.cwd(), "attached_assets", "LOGO_BLANCO_1767308770849.png");
 
 function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string, userName: string = "Usuario del Sistema") {
-  const startY = 40;
+  const pageWidth = 545;
+  const marginLeft = 50;
   
+  // Header row: Logo left, Title right
   if (fs.existsSync(logoPath)) {
-    doc.image(logoPath, 50, startY, { height: 50 });
+    doc.image(logoPath, marginLeft, 35, { height: 45 });
   }
   
-  doc.font("Times-Bold").fontSize(16).text(title, 50, startY + 15, { align: "center", width: 495 });
+  doc.fillColor("#c00000").font("Times-Bold").fontSize(18).text(title, marginLeft, 45, { align: "right", width: pageWidth - marginLeft });
+  doc.fillColor("#000000");
   
-  doc.y = startY + 70;
-  doc.moveTo(50, doc.y).lineTo(545, doc.y).stroke();
-  doc.moveDown();
+  // Info section
+  doc.y = 100;
+  
+  // Left column: Organization info
+  doc.font("Times-Bold").fontSize(10).text("Subdirección Cobertura de Cargos", marginLeft, doc.y);
+  doc.font("Times-Roman").fontSize(9).text("Ministerio de Educación", marginLeft, doc.y + 12);
+  doc.font("Times-Roman").fontSize(9).text("Gobierno de la Provincia", marginLeft, doc.y + 22);
+  
+  // Right column: Contact/User info
+  const rightColX = 350;
+  doc.font("Times-Bold").fontSize(9).text("Usuario", rightColX, 100);
+  doc.font("Times-Roman").fontSize(9).text(userName, rightColX, 112);
   
   const now = new Date();
-  const dateStr = now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "2-digit" });
-  const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+  const dateStr = now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
   
-  doc.font("Times-Roman").fontSize(9).text(`Emisión: ${dateStr}, ${timeStr}`, 50, doc.y, { align: "center", width: 495 });
-  doc.font("Times-Roman").fontSize(9).text(`Usuario: ${userName}`, 50, doc.y, { align: "center", width: 495 });
-  doc.font("Times-Roman").fontSize(9).text("Documento generado automáticamente por Subdirección Cobertura de Cargos", 50, doc.y, { align: "center", width: 495 });
-  doc.moveDown();
+  doc.font("Times-Bold").fontSize(9).text("Fecha de Emisión", rightColX + 100, 100);
+  doc.font("Times-Roman").fontSize(9).text(`${dateStr} - ${timeStr}`, rightColX + 100, 112);
+  
+  // Separator line
+  doc.y = 140;
+  doc.strokeColor("#cccccc").lineWidth(0.5).moveTo(marginLeft, doc.y).lineTo(marginLeft + pageWidth - marginLeft, doc.y).stroke();
+  doc.strokeColor("#000000");
+  doc.moveDown(1.5);
 }
 
 function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: string; value: string }[], title: string) {
   const cardX = 50;
   const cardWidth = 495;
-  const labelWidth = 150;
-  const rowHeight = 18;
-  const headerHeight = 22;
+  const labelWidth = 140;
+  const rowHeight = 16;
+  const headerHeight = 20;
   
-  const cardHeight = headerHeight + fields.length * rowHeight + 2;
+  const cardHeight = headerHeight + fields.length * rowHeight;
   
   if (doc.y + cardHeight > 740) {
     doc.addPage();
@@ -61,32 +77,39 @@ function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: 
   
   const startY = doc.y;
   
-  doc.lineWidth(1).strokeColor("#000000");
-  doc.rect(cardX, startY, cardWidth, cardHeight).stroke();
-  
-  doc.fillColor("#e0e0e0").rect(cardX, startY, cardWidth, headerHeight).fill();
-  doc.strokeColor("#000000").moveTo(cardX, startY + headerHeight).lineTo(cardX + cardWidth, startY + headerHeight).stroke();
+  // Header with subtle background
+  doc.fillColor("#f8f8f8").rect(cardX, startY, cardWidth, headerHeight).fill();
   doc.fillColor("#000000");
+  doc.font("Times-Bold").fontSize(10).text(title, cardX + 8, startY + 5, { width: cardWidth - 16 });
   
-  doc.font("Times-Bold").fontSize(11).text(title, cardX + 8, startY + 5, { width: cardWidth - 16 });
+  // Bottom border for header
+  doc.strokeColor("#999999").lineWidth(0.5).moveTo(cardX, startY + headerHeight).lineTo(cardX + cardWidth, startY + headerHeight).stroke();
   
   let currentY = startY + headerHeight;
   
   fields.forEach((field, index) => {
-    doc.moveTo(cardX, currentY).lineTo(cardX + cardWidth, currentY).stroke();
-    
-    doc.fillColor("#f5f5f5").rect(cardX, currentY, labelWidth, rowHeight).fill();
+    // Alternating row colors
+    if (index % 2 === 0) {
+      doc.fillColor("#ffffff").rect(cardX, currentY, cardWidth, rowHeight).fill();
+    } else {
+      doc.fillColor("#fafafa").rect(cardX, currentY, cardWidth, rowHeight).fill();
+    }
     doc.fillColor("#000000");
     
-    doc.moveTo(cardX + labelWidth, currentY).lineTo(cardX + labelWidth, currentY + rowHeight).stroke();
+    // Label in bold gray
+    doc.fillColor("#555555").font("Times-Bold").fontSize(8).text(field.label, cardX + 6, currentY + 4, { width: labelWidth - 12 });
     
-    doc.font("Times-Bold").fontSize(9).text(field.label, cardX + 6, currentY + 5, { width: labelWidth - 12 });
-    doc.font("Times-Roman").fontSize(9).text(field.value, cardX + labelWidth + 6, currentY + 5, { width: cardWidth - labelWidth - 12 });
+    // Value in regular black
+    doc.fillColor("#000000").font("Times-Roman").fontSize(9).text(field.value, cardX + labelWidth, currentY + 4, { width: cardWidth - labelWidth - 12 });
     
     currentY += rowHeight;
   });
   
-  doc.y = startY + cardHeight + 10;
+  // Bottom border for entire card
+  doc.strokeColor("#cccccc").lineWidth(0.5).moveTo(cardX, currentY).lineTo(cardX + cardWidth, currentY).stroke();
+  doc.strokeColor("#000000");
+  
+  doc.y = startY + cardHeight + 12;
 }
 
 const multerStorage = multer.diskStorage({
