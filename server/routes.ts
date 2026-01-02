@@ -44,19 +44,22 @@ function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, moduleName
   
   doc.y = doc.y + disclaimerHeight + 8;
   
-  // Emisión and Usuario on same line
+  // Info box with border for Emisión, Usuario, Registros
   const now = new Date();
   const dateStr = now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit", year: "numeric" });
   const timeStr = now.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit", hour12: false });
   
+  const infoBoxHeight = 35;
+  const infoBoxY = doc.y;
+  
+  doc.strokeColor("#000000").lineWidth(0.5).rect(marginLeft, infoBoxY, pageWidth, infoBoxHeight).stroke();
+  
   doc.font("Helvetica").fontSize(9).fillColor("#000000");
-  doc.text(`Emision:  ${dateStr} - ${timeStr}`, marginLeft, doc.y);
-  doc.text(`Usuario:  ${userName}`, marginLeft + 280, doc.y - 11);
+  doc.text(`Emision:  ${dateStr} - ${timeStr}`, marginLeft + 8, infoBoxY + 8);
+  doc.text(`Usuario:  ${userName}`, marginLeft + 280, infoBoxY + 8);
+  doc.text(`Registros Encontrados:  ${totalRegistros}`, marginLeft + 8, infoBoxY + 20);
   
-  // Registros Encontrados on next line
-  doc.text(`Registros Encontrados:  ${totalRegistros}`, marginLeft, doc.y + 5);
-  
-  doc.y = doc.y + 25;
+  doc.y = infoBoxY + infoBoxHeight + 10;
 }
 
 function drawEstablecimientoCard(doc: InstanceType<typeof PDFDocument>, establecimiento: string, fields: { label: string; value: string }[]) {
