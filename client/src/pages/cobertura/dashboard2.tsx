@@ -217,24 +217,19 @@ export default function Dashboard2Page() {
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50">
-                <TableHead className="min-w-[150px]">Establecimiento</TableHead>
-                <TableHead>Región</TableHead>
-                <TableHead>Localidad</TableHead>
-                <TableHead>Llamado</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Nivel</TableHead>
-                <TableHead>Carácter</TableHead>
-                <TableHead className="min-w-[200px]">Descripción</TableHead>
-                <TableHead>Docente</TableHead>
-                <TableHead>DNI</TableHead>
-                <TableHead>Habilitación</TableHead>
+                <TableHead className="min-w-[180px]">Establecimiento</TableHead>
+                <TableHead className="min-w-[120px]">Llamado</TableHead>
+                <TableHead className="min-w-[130px]">Región / Localidad</TableHead>
+                <TableHead className="min-w-[110px]">Nivel / Carácter</TableHead>
+                <TableHead className="min-w-[250px]">Descripción</TableHead>
+                <TableHead className="min-w-[180px]">Docente</TableHead>
+                <TableHead className="min-w-[90px]">Habilitación</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredDetalles.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={12} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
                     {searchQuery 
                       ? "No se encontraron registros con la búsqueda realizada"
                       : "No hay registros disponibles"}
@@ -249,21 +244,35 @@ export default function Dashboard2Page() {
                   >
                     <TableCell className="font-medium">{det.establecimiento}</TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="font-mono">{det.region}</Badge>
+                      <div className="space-y-1">
+                        <div className="text-sm font-medium">{det.llamado}</div>
+                        <div className="flex items-center gap-1 flex-wrap">
+                          <Badge variant="secondary" className="text-xs">{det.tipo}</Badge>
+                          <span className="text-xs text-muted-foreground">{det.fecha}</span>
+                        </div>
+                      </div>
                     </TableCell>
-                    <TableCell>{det.localidad}</TableCell>
-                    <TableCell className="text-sm">{det.llamado}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{det.tipo}</Badge>
+                      <div className="space-y-0.5">
+                        <Badge variant="outline" className="font-mono text-xs">{det.region}</Badge>
+                        <div className="text-sm">{det.localidad}</div>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-sm">{det.fecha}</TableCell>
-                    <TableCell>{det.nivel}</TableCell>
-                    <TableCell>{det.caracter}</TableCell>
-                    <TableCell className="text-sm">{det.descripcion}</TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {det.apellido}, {det.nombre}
+                    <TableCell>
+                      <div className="space-y-0.5">
+                        <div className="text-sm">{det.nivel}</div>
+                        <div className="text-xs text-muted-foreground">{det.caracter}</div>
+                      </div>
                     </TableCell>
-                    <TableCell className="font-mono text-sm">{det.dni}</TableCell>
+                    <TableCell className="text-sm max-w-[300px]">
+                      <div className="line-clamp-3">{det.descripcion}</div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-0.5">
+                        <div className="text-sm font-medium whitespace-nowrap">{det.apellido}, {det.nombre}</div>
+                        <div className="text-xs text-muted-foreground font-mono">DNI: {det.dni}</div>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <Badge 
                         variant={det.habilitacion === "HABILITADO" ? "default" : "secondary"}

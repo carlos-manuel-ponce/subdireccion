@@ -65,11 +65,20 @@ function createPDFHeader(doc: InstanceType<typeof PDFDocument>, title: string, u
 function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: string; value: string }[], title: string) {
   const cardX = 50;
   const cardWidth = 495;
-  const labelWidth = 140;
-  const rowHeight = 16;
-  const headerHeight = 20;
+  const labelWidth = 120;
+  const valueWidth = cardWidth - labelWidth - 16;
+  const headerHeight = 22;
+  const minRowHeight = 18;
+  const lineHeight = 11;
   
-  const cardHeight = headerHeight + fields.length * rowHeight;
+  // Calculate dynamic heights for each field based on text content
+  const fieldHeights = fields.map((field) => {
+    const textHeight = doc.font("Times-Roman").fontSize(9).heightOfString(field.value, { width: valueWidth });
+    return Math.max(minRowHeight, textHeight + 8);
+  });
+  
+  const totalContentHeight = fieldHeights.reduce((sum, h) => sum + h, 0);
+  const cardHeight = headerHeight + totalContentHeight;
   
   if (doc.y + cardHeight > 740) {
     doc.addPage();
@@ -78,9 +87,9 @@ function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: 
   const startY = doc.y;
   
   // Header with subtle background
-  doc.fillColor("#f8f8f8").rect(cardX, startY, cardWidth, headerHeight).fill();
+  doc.fillColor("#f0f0f0").rect(cardX, startY, cardWidth, headerHeight).fill();
   doc.fillColor("#000000");
-  doc.font("Times-Bold").fontSize(10).text(title, cardX + 8, startY + 5, { width: cardWidth - 16 });
+  doc.font("Times-Bold").fontSize(11).text(title, cardX + 8, startY + 6, { width: cardWidth - 16 });
   
   // Bottom border for header
   doc.strokeColor("#999999").lineWidth(0.5).moveTo(cardX, startY + headerHeight).lineTo(cardX + cardWidth, startY + headerHeight).stroke();
@@ -88,6 +97,8 @@ function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: 
   let currentY = startY + headerHeight;
   
   fields.forEach((field, index) => {
+    const rowHeight = fieldHeights[index];
+    
     // Alternating row colors
     if (index % 2 === 0) {
       doc.fillColor("#ffffff").rect(cardX, currentY, cardWidth, rowHeight).fill();
@@ -97,10 +108,10 @@ function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: 
     doc.fillColor("#000000");
     
     // Label in bold gray
-    doc.fillColor("#555555").font("Times-Bold").fontSize(8).text(field.label, cardX + 6, currentY + 4, { width: labelWidth - 12 });
+    doc.fillColor("#555555").font("Times-Bold").fontSize(9).text(field.label, cardX + 8, currentY + 5, { width: labelWidth - 12 });
     
-    // Value in regular black
-    doc.fillColor("#000000").font("Times-Roman").fontSize(9).text(field.value, cardX + labelWidth, currentY + 4, { width: cardWidth - labelWidth - 12 });
+    // Value in regular black - with proper wrapping
+    doc.fillColor("#000000").font("Times-Roman").fontSize(9).text(field.value, cardX + labelWidth, currentY + 5, { width: valueWidth, lineGap: 2 });
     
     currentY += rowHeight;
   });
@@ -109,7 +120,7 @@ function drawRecordCard(doc: InstanceType<typeof PDFDocument>, fields: { label: 
   doc.strokeColor("#cccccc").lineWidth(0.5).moveTo(cardX, currentY).lineTo(cardX + cardWidth, currentY).stroke();
   doc.strokeColor("#000000");
   
-  doc.y = startY + cardHeight + 12;
+  doc.y = currentY + 15;
 }
 
 const multerStorage = multer.diskStorage({
