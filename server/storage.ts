@@ -251,10 +251,10 @@ export class MemStorage implements IStorage {
       juntaClasificacion: row["junta de clasificacion"] || "",
       tipo: row.tipo || "",
       fecha: row.fecha || "",
-      establecimientos: row.establecimiento || 0,
-      coberturas: row.vacantes || 0,
-      postulantes: row.postulantes || 0,
-      promedio: row.promedio || 0,
+      establecimientos: Number(row.establecimiento) || 0,
+      coberturas: Number(row.vacantes) || 0,
+      postulantes: Number(row.postulantes) || 0,
+      promedio: Number(row.promedio) || 0,
     }));
   }
 
@@ -271,10 +271,10 @@ export class MemStorage implements IStorage {
       juntaClasificacion: data["junta de clasificacion"] || "",
       tipo: data.tipo || "",
       fecha: data.fecha || "",
-      establecimientos: data.establecimiento || 0,
-      coberturas: data.vacantes || 0,
-      postulantes: data.postulantes || 0,
-      promedio: data.promedio || 0,
+      establecimientos: Number(data.establecimiento) || 0,
+      coberturas: Number(data.vacantes) || 0,
+      postulantes: Number(data.postulantes) || 0,
+      promedio: Number(data.promedio) || 0,
     };
   }
 

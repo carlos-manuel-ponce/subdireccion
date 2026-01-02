@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { type CoberturaEvento, JUNTA_TYPES, TIPO_ESTADISTICA_TYPES } from "@shared/schema";
+import { type CoberturaEvento } from "@shared/schema";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function Dashboard1Page() {
@@ -18,7 +18,19 @@ export default function Dashboard1Page() {
   });
 
   const llamados = useMemo(() => {
-    return Array.from(new Set(eventos.map(e => e.llamado)));
+    return Array.from(new Set(eventos.map(e => e.llamado))).sort((a, b) => {
+      const numA = parseInt(a) || 0;
+      const numB = parseInt(b) || 0;
+      return numB - numA;
+    });
+  }, [eventos]);
+
+  const tipos = useMemo(() => {
+    return Array.from(new Set(eventos.map(e => e.tipo).filter(t => t))).sort();
+  }, [eventos]);
+
+  const juntas = useMemo(() => {
+    return Array.from(new Set(eventos.map(e => e.juntaClasificacion).filter(j => j))).sort();
   }, [eventos]);
 
   const filteredEventos = useMemo(() => {
@@ -80,7 +92,7 @@ export default function Dashboard1Page() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todos los tipos</SelectItem>
-              {TIPO_ESTADISTICA_TYPES.map((tipo) => (
+              {tipos.map((tipo) => (
                 <SelectItem key={tipo} value={tipo}>{tipo}</SelectItem>
               ))}
             </SelectContent>
@@ -94,7 +106,7 @@ export default function Dashboard1Page() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Todas las juntas</SelectItem>
-              {JUNTA_TYPES.map((junta) => (
+              {juntas.map((junta) => (
                 <SelectItem key={junta} value={junta}>{junta}</SelectItem>
               ))}
             </SelectContent>

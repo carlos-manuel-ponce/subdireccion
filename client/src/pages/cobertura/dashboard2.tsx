@@ -23,7 +23,7 @@ export default function Dashboard2Page() {
   });
 
   const uniqueEstablecimientos = useMemo(() => {
-    const establecimientos = [...new Set(detalles.map((det) => det.establecimiento))];
+    const establecimientos = Array.from(new Set(detalles.map((det) => det.establecimiento)));
     return establecimientos.sort();
   }, [detalles]);
 
