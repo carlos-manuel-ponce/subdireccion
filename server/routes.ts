@@ -27,15 +27,10 @@ function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, moduleName
   const marginLeft = 50;
   const pageWidth = 495;
   
-  // Title "INFORME DE [MODULE]" on the left - bold, underlined
-  doc.font("Helvetica-Bold").fontSize(14).fillColor("#000000").text(`INFORME DE ${moduleName}`, marginLeft, 40, { underline: true });
+  // Title "INFORME DE [MODULE]" on the left - bold, no underline
+  doc.font("Helvetica-Bold").fontSize(14).fillColor("#000000").text(`INFORME DE ${moduleName}`, marginLeft, 40);
   
   doc.y = 65;
-  
-  // Horizontal line after title
-  doc.strokeColor("#000000").lineWidth(0.5).moveTo(marginLeft, doc.y).lineTo(marginLeft + pageWidth, doc.y).stroke();
-  
-  doc.y = 75;
   
   // Disclaimer paragraph with border/frame
   const disclaimerText = "El presente documento, se emite a los fines de ser presentado donde corresponda, siendo el usuario generador responsable de su destino y utilización.";
@@ -47,9 +42,7 @@ function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, moduleName
     marginLeft + 10, doc.y + 8, { width: pageWidth - 20, align: "center" }
   );
   
-  doc.y = doc.y + disclaimerHeight + 10;
-  
-  doc.y = doc.y + 10;
+  doc.y = doc.y + disclaimerHeight + 8;
   
   // Emisión and Usuario on same line
   const now = new Date();
