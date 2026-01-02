@@ -33,7 +33,7 @@ function createCoberturaHeader(doc: InstanceType<typeof PDFDocument>, moduleName
   doc.y = 65;
   
   // Disclaimer paragraph with border/frame
-  const disclaimerText = "El presente documento, se emite a los fines de ser presentado donde corresponda, siendo el usuario generador responsable de su destino y utilización.";
+  const disclaimerText = "El presente documento se emite a los fines de su presentación ante quien corresponda, siendo el usuario que lo genera el único responsable de su uso, destino y alcance.";
   const disclaimerHeight = 35;
   
   doc.strokeColor("#000000").lineWidth(0.5).rect(marginLeft, doc.y, pageWidth, disclaimerHeight).stroke();
