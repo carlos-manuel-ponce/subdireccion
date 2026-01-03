@@ -114,6 +114,7 @@ export const expedientes = pgTable("expedientes", {
 // Tabla de Registros de Cobertura (módulo COBERTURA DE CARGOS)
 export const coberturaRegistros = pgTable("cobertura_registros", {
   id: uuid("id").primaryKey().defaultRandom(),
+  llamado: text("llamado").notNull(),
   region: text("region").notNull(),
   nivel: text("nivel").notNull(),
   responsable: text("responsable").notNull(),

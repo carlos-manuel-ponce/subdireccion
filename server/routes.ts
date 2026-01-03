@@ -386,6 +386,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
   app.post("/api/cobertura/registros", upload.single("pedido"), async (req, res) => {
     try {
       const data = {
+        llamado: req.body.llamado,
         region: req.body.region,
         nivel: req.body.nivel,
         responsable: req.body.responsable,
@@ -414,6 +415,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       }
 
       const data = {
+        llamado: req.body.llamado,
         region: req.body.region,
         nivel: req.body.nivel,
         responsable: req.body.responsable,

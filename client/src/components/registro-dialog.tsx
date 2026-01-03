@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { type CoberturaRegistro, REGION_TYPES, NIVEL_COBERTURA_TYPES, RESPONSABLE_TYPES } from "@shared/schema";
 
 const formSchema = z.object({
+  llamado: z.string().min(1, "Ingrese el número de llamado"),
   region: z.string().min(1, "Seleccione una región"),
   nivel: z.string().min(1, "Seleccione un nivel"),
   responsable: z.string().min(1, "Seleccione un responsable"),
@@ -23,7 +24,7 @@ interface RegistroDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   registro: CoberturaRegistro | null;
-  onSubmit: (formData: FormData) => void;
+  onSubmit: (formData: globalThis.FormData) => void;
   isPending: boolean;
 }
 
@@ -34,6 +35,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      llamado: "",
       region: "",
       nivel: "",
       responsable: "",
@@ -44,6 +46,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
   useEffect(() => {
     if (registro) {
       form.reset({
+        llamado: registro.llamado,
         region: registro.region,
         nivel: registro.nivel,
         responsable: registro.responsable,
@@ -52,6 +55,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
       setKeepExistingFile(!!registro.pedidoFileName);
     } else {
       form.reset({
+        llamado: "",
         region: "",
         nivel: "",
         responsable: "",
@@ -85,6 +89,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
 
   const handleSubmit = (data: FormData) => {
     const formData = new FormData();
+    formData.append("llamado", data.llamado);
     formData.append("region", data.region);
     formData.append("nivel", data.nivel);
     formData.append("responsable", data.responsable);
@@ -96,7 +101,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
       formData.append("keepFile", "true");
     }
 
-    onSubmit(formData as any);
+    onSubmit(formData);
   };
 
   return (
@@ -108,6 +113,24 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="llamado"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Llamado</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Ingrese el número de llamado"
+                      data-testid="input-llamado"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="region"
