@@ -140,8 +140,7 @@ export default function RegistroPage() {
             <TableHeader>
               <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border">
                 <TableHead className="text-foreground font-medium w-[80px]">Llamado</TableHead>
-                <TableHead className="text-foreground font-medium w-[80px]">Región</TableHead>
-                <TableHead className="text-foreground font-medium min-w-[150px]">Nivel</TableHead>
+                <TableHead className="text-foreground font-medium min-w-[200px]">Región y Nivel</TableHead>
                 <TableHead className="text-foreground font-medium min-w-[150px]">Responsable</TableHead>
                 <TableHead className="text-foreground font-medium w-[120px]">Expediente</TableHead>
                 <TableHead className="text-foreground font-medium w-[150px]">Pedido</TableHead>
@@ -153,8 +152,7 @@ export default function RegistroPage() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-5 w-12" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-12" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-5 w-40" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-28" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-24" /></TableCell>
@@ -163,7 +161,7 @@ export default function RegistroPage() {
                 ))
               ) : paginatedRegistros.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
                     No hay registros. Haga clic en "Agregar Nuevo" para crear uno.
                   </TableCell>
                 </TableRow>
@@ -179,12 +177,7 @@ export default function RegistroPage() {
                         {reg.llamado}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="font-mono">
-                        {reg.region}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-sm">{reg.nivel}</TableCell>
+                    <TableCell className="text-sm">{reg.regionNivel}</TableCell>
                     <TableCell className="text-sm">{reg.responsable}</TableCell>
                     <TableCell className="font-mono text-sm">{reg.expediente}</TableCell>
                     <TableCell>

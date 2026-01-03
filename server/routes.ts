@@ -387,8 +387,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     try {
       const data = {
         llamado: req.body.llamado,
-        region: req.body.region,
-        nivel: req.body.nivel,
+        regionNivel: req.body.regionNivel,
         responsable: req.body.responsable,
         expediente: req.body.expediente,
         pedidoFileName: req.file ? req.file.originalname : null,
@@ -416,8 +415,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
       const data = {
         llamado: req.body.llamado,
-        region: req.body.region,
-        nivel: req.body.nivel,
+        regionNivel: req.body.regionNivel,
         responsable: req.body.responsable,
         expediente: req.body.expediente,
         pedidoFileName: req.file ? req.file.originalname : (req.body.keepFile === "true" ? existing.pedidoFileName : null),

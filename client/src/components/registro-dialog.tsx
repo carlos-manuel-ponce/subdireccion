@@ -8,12 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { type CoberturaRegistro, REGION_TYPES, NIVEL_COBERTURA_TYPES, RESPONSABLE_TYPES } from "@shared/schema";
+import { type CoberturaRegistro, REGION_NIVEL_TYPES, RESPONSABLE_TYPES } from "@shared/schema";
 
 const formSchema = z.object({
   llamado: z.string().min(1, "Ingrese el número de llamado"),
-  region: z.string().min(1, "Seleccione una región"),
-  nivel: z.string().min(1, "Seleccione un nivel"),
+  regionNivel: z.string().min(1, "Seleccione una región y nivel"),
   responsable: z.string().min(1, "Seleccione un responsable"),
   expediente: z.string().min(1, "Ingrese el número de expediente"),
 });
@@ -36,8 +35,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
     resolver: zodResolver(formSchema),
     defaultValues: {
       llamado: "",
-      region: "",
-      nivel: "",
+      regionNivel: "",
       responsable: "",
       expediente: "",
     },
@@ -47,8 +45,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
     if (registro) {
       form.reset({
         llamado: registro.llamado,
-        region: registro.region,
-        nivel: registro.nivel,
+        regionNivel: registro.regionNivel,
         responsable: registro.responsable,
         expediente: registro.expediente,
       });
@@ -56,8 +53,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
     } else {
       form.reset({
         llamado: "",
-        region: "",
-        nivel: "",
+        regionNivel: "",
         responsable: "",
         expediente: "",
       });
@@ -90,8 +86,7 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
   const handleSubmit = (data: FormData) => {
     const formData = new FormData();
     formData.append("llamado", data.llamado);
-    formData.append("region", data.region);
-    formData.append("nivel", data.nivel);
+    formData.append("regionNivel", data.regionNivel);
     formData.append("responsable", data.responsable);
     formData.append("expediente", data.expediente);
     
@@ -133,42 +128,19 @@ export function RegistroDialog({ open, onOpenChange, registro, onSubmit, isPendi
 
             <FormField
               control={form.control}
-              name="region"
+              name="regionNivel"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Región Educativa</FormLabel>
+                  <FormLabel>Región y Nivel</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
-                      <SelectTrigger data-testid="select-region">
-                        <SelectValue placeholder="Seleccione una región" />
+                      <SelectTrigger data-testid="select-region-nivel">
+                        <SelectValue placeholder="Seleccione región y nivel" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {REGION_TYPES.map((region) => (
-                        <SelectItem key={region} value={region}>Región {region}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="nivel"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nivel</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-nivel">
-                        <SelectValue placeholder="Seleccione un nivel" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {NIVEL_COBERTURA_TYPES.map((nivel) => (
-                        <SelectItem key={nivel} value={nivel}>{nivel}</SelectItem>
+                      {REGION_NIVEL_TYPES.map((item) => (
+                        <SelectItem key={item} value={item}>{item}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

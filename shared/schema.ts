@@ -62,6 +62,17 @@ export type RegionType = (typeof REGION_TYPES)[number];
 export const NIVEL_COBERTURA_TYPES = ["INICIAL Y PRIMARIO", "SECUNDARIO"] as const;
 export type NivelCoberturaType = (typeof NIVEL_COBERTURA_TYPES)[number];
 
+// Nomenclador de Región y Nivel combinados
+export const REGION_NIVEL_TYPES = [
+  "Region I y VI - Primario",
+  "Region I y VI - Secundario",
+  "Region II y III - Primario",
+  "Region II y III - Secundario",
+  "Region IV y V - Primario",
+  "Region IV y V - Secundario",
+] as const;
+export type RegionNivelType = (typeof REGION_NIVEL_TYPES)[number];
+
 // Nomenclador de Responsables
 export const RESPONSABLE_TYPES = [
   "YANINA VARGAS",
