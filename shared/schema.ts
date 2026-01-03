@@ -115,8 +115,7 @@ export const expedientes = pgTable("expedientes", {
 export const coberturaRegistros = pgTable("cobertura_registros", {
   id: uuid("id").primaryKey().defaultRandom(),
   llamado: text("llamado").notNull(),
-  region: text("region").notNull(),
-  nivel: text("nivel").notNull(),
+  regionNivel: text("region_nivel").notNull(),
   responsable: text("responsable").notNull(),
   expediente: text("expediente").notNull(),
   pedidoFileName: text("pedido_file_name"),
