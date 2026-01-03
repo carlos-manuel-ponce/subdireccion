@@ -4,6 +4,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import PDFDocument from "pdfkit";
+import { createClient } from "@supabase/supabase-js";
 import { storage } from "./storage";
 import {
   insertExpedienteSchema,
@@ -15,6 +16,10 @@ import {
   type TitularizacionRegistro,
 } from "@shared/schema";
 import { fromError } from "zod-validation-error";
+
+const supabaseUrl = process.env.SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const uploadsDir = path.join(process.cwd(), "uploads");
 if (!fs.existsSync(uploadsDir)) {
@@ -369,37 +374,92 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     }
   });
 
-  // ==================== COBERTURA REGISTROS ====================
+  // ==================== COBERTURA REGISTROS (Supabase - tabla "pedidos") ====================
   app.get("/api/cobertura/registros", async (_req, res) => {
-    const registros = await storage.getCoberturaRegistros();
-    res.json(registros);
+    try {
+      const { data, error } = await supabase
+        .from("pedidos")
+        .select("*")
+        .order("llamado", { ascending: true });
+      
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      
+      const registros = (data || []).map((row: any) => ({
+        id: row.id,
+        llamado: row.llamado,
+        regionNivel: row.region_nivel,
+        responsable: row.responsable,
+        expediente: row.expediente,
+        pedidoFileName: row.pedido,
+        pedidoFilePath: null,
+      }));
+      
+      res.json(registros);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener registros" });
+    }
   });
 
   app.get("/api/cobertura/registros/:id", async (req, res) => {
-    const registro = await storage.getCoberturaRegistro(req.params.id);
-    if (!registro) {
-      return res.status(404).json({ error: "Registro no encontrado" });
+    try {
+      const { data, error } = await supabase
+        .from("pedidos")
+        .select("*")
+        .eq("id", req.params.id)
+        .single();
+      
+      if (error || !data) {
+        return res.status(404).json({ error: "Registro no encontrado" });
+      }
+      
+      const registro = {
+        id: data.id,
+        llamado: data.llamado,
+        regionNivel: data.region_nivel,
+        responsable: data.responsable,
+        expediente: data.expediente,
+        pedidoFileName: data.pedido,
+        pedidoFilePath: null,
+      };
+      
+      res.json(registro);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener registro" });
     }
-    res.json(registro);
   });
 
   app.post("/api/cobertura/registros", upload.single("pedido"), async (req, res) => {
     try {
-      const data = {
+      const insertData = {
         llamado: req.body.llamado,
-        regionNivel: req.body.regionNivel,
+        region_nivel: req.body.regionNivel,
         responsable: req.body.responsable,
         expediente: req.body.expediente,
-        pedidoFileName: req.file ? req.file.originalname : null,
-        pedidoFilePath: req.file ? req.file.filename : null,
+        pedido: req.file ? req.file.originalname : null,
       };
 
-      const result = insertCoberturaRegistroSchema.safeParse(data);
-      if (!result.success) {
-        return res.status(400).json({ error: fromError(result.error).message });
+      const { data, error } = await supabase
+        .from("pedidos")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
       }
 
-      const registro = await storage.createCoberturaRegistro(result.data);
+      const registro = {
+        id: data.id,
+        llamado: data.llamado,
+        regionNivel: data.region_nivel,
+        responsable: data.responsable,
+        expediente: data.expediente,
+        pedidoFileName: data.pedido,
+        pedidoFilePath: null,
+      };
+
       res.status(201).json(registro);
     } catch (error) {
       res.status(500).json({ error: "Error al crear el registro" });
@@ -408,26 +468,45 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
   app.put("/api/cobertura/registros/:id", upload.single("pedido"), async (req, res) => {
     try {
-      const existing = await storage.getCoberturaRegistro(req.params.id);
-      if (!existing) {
+      const { data: existing, error: fetchError } = await supabase
+        .from("pedidos")
+        .select("*")
+        .eq("id", req.params.id)
+        .single();
+
+      if (fetchError || !existing) {
         return res.status(404).json({ error: "Registro no encontrado" });
       }
 
-      const data = {
+      const updateData = {
         llamado: req.body.llamado,
-        regionNivel: req.body.regionNivel,
+        region_nivel: req.body.regionNivel,
         responsable: req.body.responsable,
         expediente: req.body.expediente,
-        pedidoFileName: req.file ? req.file.originalname : (req.body.keepFile === "true" ? existing.pedidoFileName : null),
-        pedidoFilePath: req.file ? req.file.filename : (req.body.keepFile === "true" ? existing.pedidoFilePath : null),
+        pedido: req.file ? req.file.originalname : (req.body.keepFile === "true" ? existing.pedido : null),
       };
 
-      const result = insertCoberturaRegistroSchema.safeParse(data);
-      if (!result.success) {
-        return res.status(400).json({ error: fromError(result.error).message });
+      const { data, error } = await supabase
+        .from("pedidos")
+        .update(updateData)
+        .eq("id", req.params.id)
+        .select()
+        .single();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
       }
 
-      const registro = await storage.updateCoberturaRegistro(req.params.id, result.data);
+      const registro = {
+        id: data.id,
+        llamado: data.llamado,
+        regionNivel: data.region_nivel,
+        responsable: data.responsable,
+        expediente: data.expediente,
+        pedidoFileName: data.pedido,
+        pedidoFilePath: null,
+      };
+
       res.json(registro);
     } catch (error) {
       res.status(500).json({ error: "Error al actualizar el registro" });
@@ -435,26 +514,20 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
   });
 
   app.delete("/api/cobertura/registros/:id", async (req, res) => {
-    const deleted = await storage.deleteCoberturaRegistro(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ error: "Registro no encontrado" });
-    }
-    res.status(204).send();
-  });
+    try {
+      const { error } = await supabase
+        .from("pedidos")
+        .delete()
+        .eq("id", req.params.id);
 
-  // File download
-  app.get("/api/cobertura/registros/:id/download", async (req, res) => {
-    const registro = await storage.getCoberturaRegistro(req.params.id);
-    if (!registro || !registro.pedidoFilePath) {
-      return res.status(404).json({ error: "Archivo no encontrado" });
-    }
+      if (error) {
+        return res.status(404).json({ error: "Registro no encontrado" });
+      }
 
-    const filePath = path.join(uploadsDir, registro.pedidoFilePath);
-    if (!fs.existsSync(filePath)) {
-      return res.status(404).json({ error: "Archivo no encontrado" });
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Error al eliminar registro" });
     }
-
-    res.download(filePath, registro.pedidoFileName || "documento.docx");
   });
 
   // ==================== COBERTURA EVENTOS (Dashboard 1) ====================
