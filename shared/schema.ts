@@ -97,8 +97,20 @@ export const JUNTA_TYPES = ["INICIAL Y PRIMARIA", "SECUNDARIA"] as const;
 export type JuntaType = (typeof JUNTA_TYPES)[number];
 
 // Nomenclador de Módulos para Login
-export const MODULE_TYPES = ["CREACIONES", "COBERTURA", "TITULARIZACIONES", "INFORMES"] as const;
+export const MODULE_TYPES = ["CREACIONES", "COBERTURA", "TITULARIZACIONES", "INFORMES", "JUNTAS"] as const;
 export type ModuleType = (typeof MODULE_TYPES)[number];
+
+// Nomenclador de Estados de Tareas (JUNTAS)
+export const TAREA_STATUS_TYPES = ["PENDIENTE", "EN_PROGRESO", "COMPLETADA", "CANCELADA"] as const;
+export type TareaStatusType = (typeof TAREA_STATUS_TYPES)[number];
+
+// Nomenclador de Estados de Objetivos (JUNTAS)
+export const OBJETIVO_STATUS_TYPES = ["ACTIVO", "COMPLETADO", "PAUSADO"] as const;
+export type ObjetivoStatusType = (typeof OBJETIVO_STATUS_TYPES)[number];
+
+// Nomenclador de Estados de Proyectos (JUNTAS)
+export const PROYECTO_STATUS_TYPES = ["PLANIFICACION", "EN_CURSO", "COMPLETADO", "SUSPENDIDO"] as const;
+export type ProyectoStatusType = (typeof PROYECTO_STATUS_TYPES)[number];
 
 // Nomenclador de Tipos de Actividad para el módulo INFORMES
 export const ACTIVIDAD_TYPES = [
@@ -257,6 +269,54 @@ export const actividadesLog = pgTable("actividades_log", {
 export const insertActividadLogSchema = createInsertSchema(actividadesLog).omit({ id: true });
 export type InsertActividadLog = z.infer<typeof insertActividadLogSchema>;
 export type ActividadLog = typeof actividadesLog.$inferSelect;
+
+// ==================== TABLAS JUNTAS DE CLASIFICACIÓN ====================
+
+// Tabla de Eventos de Calendario (JUNTAS)
+export const juntasEventos = pgTable("juntas_eventos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  titulo: text("titulo").notNull(),
+  descripcion: text("descripcion"),
+  fecha: text("fecha").notNull(),
+  horaInicio: text("hora_inicio"),
+  horaFin: text("hora_fin"),
+  color: text("color").notNull().default("#3b82f6"),
+  estado: text("estado").notNull().default("PENDIENTE"),
+});
+
+// Tabla de Objetivos (JUNTAS)
+export const juntasObjetivos = pgTable("juntas_objetivos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  titulo: text("titulo").notNull(),
+  descripcion: text("descripcion"),
+  fechaLimite: text("fecha_limite"),
+  progreso: integer("progreso").notNull().default(0),
+  estado: text("estado").notNull().default("ACTIVO"),
+});
+
+// Tabla de Proyectos (JUNTAS)
+export const juntasProyectos = pgTable("juntas_proyectos", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  nombre: text("nombre").notNull(),
+  descripcion: text("descripcion"),
+  fechaInicio: text("fecha_inicio"),
+  fechaFin: text("fecha_fin"),
+  estado: text("estado").notNull().default("PLANIFICACION"),
+  prioridad: text("prioridad").notNull().default("MEDIA"),
+});
+
+// Schemas y Types para JUNTAS
+export const insertJuntasEventoSchema = createInsertSchema(juntasEventos).omit({ id: true });
+export type InsertJuntasEvento = z.infer<typeof insertJuntasEventoSchema>;
+export type JuntasEvento = typeof juntasEventos.$inferSelect;
+
+export const insertJuntasObjetivoSchema = createInsertSchema(juntasObjetivos).omit({ id: true });
+export type InsertJuntasObjetivo = z.infer<typeof insertJuntasObjetivoSchema>;
+export type JuntasObjetivo = typeof juntasObjetivos.$inferSelect;
+
+export const insertJuntasProyectoSchema = createInsertSchema(juntasProyectos).omit({ id: true });
+export type InsertJuntasProyecto = z.infer<typeof insertJuntasProyectoSchema>;
+export type JuntasProyecto = typeof juntasProyectos.$inferSelect;
 
 // Login Schema
 export const loginSchema = z.object({

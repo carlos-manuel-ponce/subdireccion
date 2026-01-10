@@ -8,6 +8,7 @@ import CreacionesHome from "@/pages/creaciones";
 import CoberturaLayout from "@/pages/cobertura/layout";
 import TitularizacionesLayout from "@/pages/titularizaciones/layout";
 import InformesLayout from "@/pages/informes/layout";
+import JuntasLayout from "@/pages/juntas/layout";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -20,6 +21,8 @@ function Router() {
       <Route path="/titularizaciones" component={TitularizacionesLayout} />
       <Route path="/titularizaciones/:tab" component={TitularizacionesLayout} />
       <Route path="/informes" component={InformesLayout} />
+      <Route path="/juntas" component={JuntasLayout} />
+      <Route path="/juntas/:tab" component={JuntasLayout} />
       <Route component={NotFound} />
     </Switch>
   );

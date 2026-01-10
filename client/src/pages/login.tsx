@@ -34,6 +34,8 @@ export default function Login() {
         setLocation("/titularizaciones");
       } else if (data.module === "INFORMES") {
         setLocation("/informes");
+      } else if (data.module === "JUNTAS") {
+        setLocation("/juntas");
       }
     },
     onError: () => {
@@ -61,7 +63,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-lg">
+        <div className="w-full max-w-2xl">
           <Card className="p-6">
             <div className="space-y-6">
               <div className="text-center space-y-2">
@@ -71,7 +73,7 @@ export default function Login() {
                 <p className="text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
               </div>
 
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 <div
                   className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
                     selectedModule === "CREACIONES" ? "ring-2 ring-primary bg-muted" : ""
@@ -135,6 +137,22 @@ export default function Login() {
                     <p className="text-xs text-muted-foreground mt-1">Actividades</p>
                   </div>
                 </div>
+
+                <div
+                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                    selectedModule === "JUNTAS" ? "ring-2 ring-primary bg-muted" : ""
+                  }`}
+                  onClick={() => setSelectedModule("JUNTAS")}
+                  data-testid="card-module-juntas"
+                >
+                  <div className="text-center">
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-xs">JUNTAS DE CLASIFICACIÓN</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Calendario</p>
+                  </div>
+                </div>
               </div>
 
               {selectedModule && (
@@ -148,6 +166,7 @@ export default function Login() {
                       {selectedModule === "COBERTURA" && "6 usuarios autorizados"}
                       {selectedModule === "TITULARIZACIONES" && "2 usuarios autorizados"}
                       {selectedModule === "INFORMES" && "2 usuarios autorizados"}
+                      {selectedModule === "JUNTAS" && "2 usuarios autorizados"}
                     </p>
                   </div>
                   <div className="space-y-2">

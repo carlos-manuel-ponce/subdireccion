@@ -288,6 +288,11 @@ const INFORMES_USERS: Array<{ name: string; pin: string }> = [
   { name: "Manuel Ponce", pin: "1111" },
 ];
 
+const JUNTAS_USERS: Array<{ name: string; pin: string }> = [
+  { name: "Nancy Carrizo", pin: "3087" },
+  { name: "Manuel Ponce", pin: "1111" },
+];
+
 export async function registerRoutes(server: Server, app: Express): Promise<void> {
   // ==================== AUTH ====================
   app.post("/api/auth/login", async (req, res) => {
@@ -325,6 +330,14 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
       if (module === "INFORMES") {
         const user = INFORMES_USERS.find(u => u.pin === pin);
+        if (!user) {
+          return res.status(401).json({ error: "PIN incorrecto" });
+        }
+        return res.json({ success: true, module, userName: user.name });
+      }
+
+      if (module === "JUNTAS") {
+        const user = JUNTAS_USERS.find(u => u.pin === pin);
         if (!user) {
           return res.status(401).json({ error: "PIN incorrecto" });
         }
@@ -939,6 +952,209 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       res.status(201).json(actividad);
     } catch (error) {
       res.status(500).json({ error: "Error al registrar actividad" });
+    }
+  });
+
+  // ==================== JUNTAS DE CLASIFICACIÓN ====================
+  
+  // Eventos
+  app.get("/api/juntas/eventos", async (_req, res) => {
+    try {
+      const { data, error } = await supabase
+        .from("juntas_eventos")
+        .select("*")
+        .order("fecha", { ascending: true });
+      
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      
+      const eventos = (data || []).map((row: any) => ({
+        id: row.id,
+        titulo: row.titulo,
+        descripcion: row.descripcion,
+        fecha: row.fecha,
+        horaInicio: row.hora_inicio,
+        horaFin: row.hora_fin,
+        color: row.color,
+        estado: row.estado,
+      }));
+      
+      res.json(eventos);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener eventos" });
+    }
+  });
+
+  app.post("/api/juntas/eventos", async (req, res) => {
+    try {
+      const { titulo, descripcion, fecha, horaInicio, horaFin, color, estado } = req.body;
+      
+      const insertData = {
+        titulo,
+        descripcion: descripcion || null,
+        fecha,
+        hora_inicio: horaInicio || null,
+        hora_fin: horaFin || null,
+        color: color || "#3b82f6",
+        estado: estado || "PENDIENTE",
+      };
+
+      const { data, error } = await supabase
+        .from("juntas_eventos")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      const evento = {
+        id: data.id,
+        titulo: data.titulo,
+        descripcion: data.descripcion,
+        fecha: data.fecha,
+        horaInicio: data.hora_inicio,
+        horaFin: data.hora_fin,
+        color: data.color,
+        estado: data.estado,
+      };
+
+      res.status(201).json(evento);
+    } catch (error) {
+      res.status(500).json({ error: "Error al crear evento" });
+    }
+  });
+
+  // Objetivos
+  app.get("/api/juntas/objetivos", async (_req, res) => {
+    try {
+      const { data, error } = await supabase
+        .from("juntas_objetivos")
+        .select("*")
+        .order("estado", { ascending: true });
+      
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      
+      const objetivos = (data || []).map((row: any) => ({
+        id: row.id,
+        titulo: row.titulo,
+        descripcion: row.descripcion,
+        fechaLimite: row.fecha_limite,
+        progreso: row.progreso,
+        estado: row.estado,
+      }));
+      
+      res.json(objetivos);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener objetivos" });
+    }
+  });
+
+  app.post("/api/juntas/objetivos", async (req, res) => {
+    try {
+      const { titulo, descripcion, fechaLimite, progreso, estado } = req.body;
+      
+      const insertData = {
+        titulo,
+        descripcion: descripcion || null,
+        fecha_limite: fechaLimite || null,
+        progreso: progreso || 0,
+        estado: estado || "ACTIVO",
+      };
+
+      const { data, error } = await supabase
+        .from("juntas_objetivos")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      const objetivo = {
+        id: data.id,
+        titulo: data.titulo,
+        descripcion: data.descripcion,
+        fechaLimite: data.fecha_limite,
+        progreso: data.progreso,
+        estado: data.estado,
+      };
+
+      res.status(201).json(objetivo);
+    } catch (error) {
+      res.status(500).json({ error: "Error al crear objetivo" });
+    }
+  });
+
+  // Proyectos
+  app.get("/api/juntas/proyectos", async (_req, res) => {
+    try {
+      const { data, error } = await supabase
+        .from("juntas_proyectos")
+        .select("*")
+        .order("estado", { ascending: true });
+      
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      
+      const proyectos = (data || []).map((row: any) => ({
+        id: row.id,
+        nombre: row.nombre,
+        descripcion: row.descripcion,
+        fechaInicio: row.fecha_inicio,
+        fechaFin: row.fecha_fin,
+        estado: row.estado,
+        prioridad: row.prioridad,
+      }));
+      
+      res.json(proyectos);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener proyectos" });
+    }
+  });
+
+  app.post("/api/juntas/proyectos", async (req, res) => {
+    try {
+      const { nombre, descripcion, fechaInicio, fechaFin, estado, prioridad } = req.body;
+      
+      const insertData = {
+        nombre,
+        descripcion: descripcion || null,
+        fecha_inicio: fechaInicio || null,
+        fecha_fin: fechaFin || null,
+        estado: estado || "PLANIFICACION",
+        prioridad: prioridad || "MEDIA",
+      };
+
+      const { data, error } = await supabase
+        .from("juntas_proyectos")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      const proyecto = {
+        id: data.id,
+        nombre: data.nombre,
+        descripcion: data.descripcion,
+        fechaInicio: data.fecha_inicio,
+        fechaFin: data.fecha_fin,
+        estado: data.estado,
+        prioridad: data.prioridad,
+      };
+
+      res.status(201).json(proyecto);
+    } catch (error) {
+      res.status(500).json({ error: "Error al crear proyecto" });
     }
   });
 }
