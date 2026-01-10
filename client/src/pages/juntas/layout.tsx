@@ -137,7 +137,6 @@ export default function JuntasLayout() {
       return weekDates.some(d => formatDate(d) === formatDate(eventDate));
     }).length,
     objetivosActivos: objetivos.filter(o => o.estado === "ACTIVO").length,
-    objetivosCompletados: objetivos.filter(o => o.estado === "COMPLETADO").length,
   };
 
   return (
@@ -148,7 +147,7 @@ export default function JuntasLayout() {
             <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-juntas-title">
               JUNTAS DE CLASIFICACIÓN
             </h1>
-            <p className="text-sm text-muted-foreground">CALENDARIO Y OBJETIVOS</p>
+            <p className="text-sm text-muted-foreground">ORGANIZACIÓN</p>
           </div>
           <div className="flex-1 flex justify-center">
             <img 
@@ -169,7 +168,7 @@ export default function JuntasLayout() {
       </header>
 
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
           <Card className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-md bg-blue-500/10">
@@ -200,17 +199,6 @@ export default function JuntasLayout() {
               <div>
                 <p className="text-xs text-muted-foreground">Objetivos Activos</p>
                 <p className="text-2xl font-bold text-emerald-400" data-testid="stat-objetivos">{stats.objetivosActivos}</p>
-              </div>
-            </div>
-          </Card>
-          <Card className="p-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-md bg-amber-500/10">
-                <Target className="w-5 h-5 text-amber-400" />
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground">Completados</p>
-                <p className="text-2xl font-bold text-amber-400" data-testid="stat-completados">{stats.objetivosCompletados}</p>
               </div>
             </div>
           </Card>
