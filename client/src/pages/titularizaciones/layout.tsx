@@ -37,8 +37,11 @@ export default function TitularizacionesLayout() {
 
   const handleLogout = () => {
     localStorage.removeItem("authModule");
+    localStorage.removeItem("authUserName");
     setLocation("/");
   };
+
+  const currentUserName = localStorage.getItem("authUserName") || "Usuario";
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -58,7 +61,8 @@ export default function TitularizacionesLayout() {
               data-testid="img-logo"
             />
           </div>
-          <div className="flex-1 flex justify-end">
+          <div className="flex-1 flex justify-end items-center gap-3">
+            <span className="text-sm text-muted-foreground" data-testid="text-current-user">{currentUserName}</span>
             <Button variant="ghost" size="sm" onClick={handleLogout} data-testid="button-logout">
               <LogOut className="mr-2 h-4 w-4" />
               Salir

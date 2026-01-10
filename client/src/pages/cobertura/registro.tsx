@@ -80,11 +80,19 @@ export default function RegistroPage() {
     },
   });
 
-  const totalPages = Math.ceil(registros.length / ITEMS_PER_PAGE);
+  const sortedRegistros = useMemo(() => {
+    return [...registros].sort((a, b) => {
+      const llamadoA = parseInt(a.llamado) || 0;
+      const llamadoB = parseInt(b.llamado) || 0;
+      return llamadoA - llamadoB;
+    });
+  }, [registros]);
+
+  const totalPages = Math.ceil(sortedRegistros.length / ITEMS_PER_PAGE);
   const paginatedRegistros = useMemo(() => {
     const start = (currentPage - 1) * ITEMS_PER_PAGE;
-    return registros.slice(start, start + ITEMS_PER_PAGE);
-  }, [registros, currentPage]);
+    return sortedRegistros.slice(start, start + ITEMS_PER_PAGE);
+  }, [sortedRegistros, currentPage]);
 
   const handleOpenCreate = () => {
     setSelectedRegistro(null);
@@ -235,10 +243,10 @@ export default function RegistroPage() {
           </Table>
         </div>
 
-        {registros.length > 0 && (
+        {sortedRegistros.length > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
-              Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, registros.length)} de {registros.length} registros
+              Mostrando {((currentPage - 1) * ITEMS_PER_PAGE) + 1}-{Math.min(currentPage * ITEMS_PER_PAGE, sortedRegistros.length)} de {sortedRegistros.length} registros
             </p>
             <div className="flex items-center gap-2">
               <Button
