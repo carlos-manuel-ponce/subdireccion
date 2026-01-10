@@ -73,7 +73,7 @@ export default function Dashboard2Page() {
         body: JSON.stringify({
           establecimiento: searchQuery || undefined,
           detalles: filteredDetalles,
-          userName: "Carlos Manuel Ponce"
+          userName: localStorage.getItem("authUserName") || "Usuario del Sistema"
         }),
       });
       if (!response.ok) throw new Error("Error al generar el informe");
@@ -229,7 +229,7 @@ export default function Dashboard2Page() {
           )}
           
           <p className="text-sm text-muted-foreground">
-            {filteredDetalles.length} resultado(s) encontrado(s)
+            <span className="text-blue-400 font-semibold">{filteredDetalles.length}</span> resultado(s) encontrado(s)
           </p>
         </div>
       </Card>

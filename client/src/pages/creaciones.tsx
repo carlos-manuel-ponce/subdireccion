@@ -235,21 +235,30 @@ export default function CreacionesHome() {
         {/* Ubicación Counters - solo las que existen en la tabla */}
         {existingUbicaciones.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
-            {existingUbicaciones.map((ubicacion) => (
-              <Card 
-                key={ubicacion} 
-                className={`p-4 cursor-pointer transition-all hover-elevate ${ubicacionFilter === ubicacion ? 'ring-2 ring-primary' : ''}`}
-                onClick={() => setUbicacionFilter(ubicacionFilter === ubicacion ? "all" : ubicacion as UbicacionType)}
-                data-testid={`counter-${ubicacion}`}
-              >
-                <div className="text-center">
-                  <span className="text-2xl font-bold text-foreground" data-testid={`stat-value-${ubicacion}`}>
-                    {ubicacionStats[ubicacion] || 0}
-                  </span>
-                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{ubicacion}</p>
-                </div>
-              </Card>
-            ))}
+            {existingUbicaciones.map((ubicacion, index) => {
+              const colors = [
+                "text-blue-400", "text-emerald-400", "text-violet-400", "text-amber-400",
+                "text-rose-400", "text-cyan-400", "text-orange-400", "text-teal-400",
+                "text-pink-400", "text-lime-400", "text-indigo-400", "text-fuchsia-400",
+                "text-sky-400", "text-green-400", "text-purple-400"
+              ];
+              const colorClass = colors[index % colors.length];
+              return (
+                <Card 
+                  key={ubicacion} 
+                  className={`p-4 cursor-pointer transition-all hover-elevate ${ubicacionFilter === ubicacion ? 'ring-2 ring-primary' : ''}`}
+                  onClick={() => setUbicacionFilter(ubicacionFilter === ubicacion ? "all" : ubicacion as UbicacionType)}
+                  data-testid={`counter-${ubicacion}`}
+                >
+                  <div className="text-center">
+                    <span className={`text-2xl font-bold ${colorClass}`} data-testid={`stat-value-${ubicacion}`}>
+                      {ubicacionStats[ubicacion] || 0}
+                    </span>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{ubicacion}</p>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         )}
 

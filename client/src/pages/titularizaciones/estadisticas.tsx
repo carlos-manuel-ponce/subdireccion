@@ -94,7 +94,7 @@ export default function EstadisticasPage() {
           </div>
           <div className="flex items-center gap-2 mt-4 sm:mt-6">
             <span className="text-sm text-muted-foreground">Total:</span>
-            <span className="text-2xl font-bold text-foreground" data-testid="stat-total">
+            <span className="text-2xl font-bold text-emerald-400" data-testid="stat-total">
               {totalTitularizaciones}
             </span>
           </div>

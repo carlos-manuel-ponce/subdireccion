@@ -132,12 +132,12 @@ export default function Dashboard1Page() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="p-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-md bg-muted">
-              <FileText className="h-6 w-6 text-muted-foreground" />
+            <div className="p-3 rounded-md bg-violet-500/20">
+              <FileText className="h-6 w-6 text-violet-400" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Llamados</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="stat-total-llamados">
+              <p className="text-3xl font-bold text-violet-400" data-testid="stat-total-llamados">
                 {stats.totalLlamados}
               </p>
             </div>
@@ -145,12 +145,12 @@ export default function Dashboard1Page() {
         </Card>
         <Card className="p-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-md bg-muted">
-              <CheckCircle className="h-6 w-6 text-muted-foreground" />
+            <div className="p-3 rounded-md bg-blue-500/20">
+              <CheckCircle className="h-6 w-6 text-blue-400" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Coberturas</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="stat-total-coberturas">
+              <p className="text-3xl font-bold text-blue-400" data-testid="stat-total-coberturas">
                 {stats.totalCoberturas}
               </p>
             </div>
@@ -158,12 +158,12 @@ export default function Dashboard1Page() {
         </Card>
         <Card className="p-6">
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-md bg-muted">
-              <Users className="h-6 w-6 text-muted-foreground" />
+            <div className="p-3 rounded-md bg-emerald-500/20">
+              <Users className="h-6 w-6 text-emerald-400" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Postulantes</p>
-              <p className="text-3xl font-bold text-foreground" data-testid="stat-total-postulantes">
+              <p className="text-3xl font-bold text-emerald-400" data-testid="stat-total-postulantes">
                 {stats.totalPostulantes}
               </p>
             </div>
@@ -238,10 +238,10 @@ export default function Dashboard1Page() {
                     <TableCell>{evt.juntaClasificacion}</TableCell>
                     <TableCell>{evt.tipo}</TableCell>
                     <TableCell>{evt.fecha}</TableCell>
-                    <TableCell className="text-right">{evt.establecimientos}</TableCell>
-                    <TableCell className="text-right font-semibold">{evt.coberturas}</TableCell>
-                    <TableCell className="text-right font-semibold">{evt.postulantes}</TableCell>
-                    <TableCell className="text-right">{evt.promedio.toFixed(1)}</TableCell>
+                    <TableCell className="text-right text-violet-400 font-medium">{evt.establecimientos}</TableCell>
+                    <TableCell className="text-right font-semibold text-blue-400">{evt.coberturas}</TableCell>
+                    <TableCell className="text-right font-semibold text-emerald-400">{evt.postulantes}</TableCell>
+                    <TableCell className="text-right text-amber-400 font-medium">{evt.promedio.toFixed(1)}</TableCell>
                   </TableRow>
                 ))
               )}
