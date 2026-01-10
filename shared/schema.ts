@@ -270,39 +270,25 @@ export const insertActividadLogSchema = createInsertSchema(actividadesLog).omit(
 export type InsertActividadLog = z.infer<typeof insertActividadLogSchema>;
 export type ActividadLog = typeof actividadesLog.$inferSelect;
 
-// ==================== TABLAS JUNTAS DE CLASIFICACIÓN ====================
+// ==================== TABLAS JUNTAS DE CLASIFICACIÓN (Supabase) ====================
 
-// Tabla de Eventos de Calendario (JUNTAS)
-export const juntasEventos = pgTable("juntas_eventos", {
+// Tabla de Eventos de Calendario (JUNTAS) - Supabase table "eventos"
+export const juntasEventos = pgTable("eventos", {
   id: uuid("id").primaryKey().defaultRandom(),
   titulo: text("titulo").notNull(),
   descripcion: text("descripcion"),
   fecha: text("fecha").notNull(),
-  horaInicio: text("hora_inicio"),
-  horaFin: text("hora_fin"),
-  color: text("color").notNull().default("#3b82f6"),
-  estado: text("estado").notNull().default("PENDIENTE"),
+  color: text("color"),
+  inicio: text("inicio"),
+  fin: text("fin"),
 });
 
-// Tabla de Objetivos (JUNTAS)
-export const juntasObjetivos = pgTable("juntas_objetivos", {
+// Tabla de Objetivos (JUNTAS) - Supabase table "objetivos"
+export const juntasObjetivos = pgTable("objetivos", {
   id: uuid("id").primaryKey().defaultRandom(),
   titulo: text("titulo").notNull(),
   descripcion: text("descripcion"),
-  fechaLimite: text("fecha_limite"),
-  progreso: integer("progreso").notNull().default(0),
-  estado: text("estado").notNull().default("ACTIVO"),
-});
-
-// Tabla de Proyectos (JUNTAS)
-export const juntasProyectos = pgTable("juntas_proyectos", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  nombre: text("nombre").notNull(),
-  descripcion: text("descripcion"),
-  fechaInicio: text("fecha_inicio"),
-  fechaFin: text("fecha_fin"),
-  estado: text("estado").notNull().default("PLANIFICACION"),
-  prioridad: text("prioridad").notNull().default("MEDIA"),
+  fecha: text("fecha"),
 });
 
 // Schemas y Types para JUNTAS
@@ -313,10 +299,6 @@ export type JuntasEvento = typeof juntasEventos.$inferSelect;
 export const insertJuntasObjetivoSchema = createInsertSchema(juntasObjetivos).omit({ id: true });
 export type InsertJuntasObjetivo = z.infer<typeof insertJuntasObjetivoSchema>;
 export type JuntasObjetivo = typeof juntasObjetivos.$inferSelect;
-
-export const insertJuntasProyectoSchema = createInsertSchema(juntasProyectos).omit({ id: true });
-export type InsertJuntasProyecto = z.infer<typeof insertJuntasProyectoSchema>;
-export type JuntasProyecto = typeof juntasProyectos.$inferSelect;
 
 // Login Schema
 export const loginSchema = z.object({

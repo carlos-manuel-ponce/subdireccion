@@ -957,11 +957,11 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
   // ==================== JUNTAS DE CLASIFICACIÓN ====================
   
-  // Eventos
+  // Eventos (Supabase table "eventos")
   app.get("/api/juntas/eventos", async (_req, res) => {
     try {
       const { data, error } = await supabase
-        .from("juntas_eventos")
+        .from("eventos")
         .select("*")
         .order("fecha", { ascending: true });
       
@@ -974,10 +974,9 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         titulo: row.titulo,
         descripcion: row.descripcion,
         fecha: row.fecha,
-        horaInicio: row.hora_inicio,
-        horaFin: row.hora_fin,
         color: row.color,
-        estado: row.estado,
+        inicio: row.inicio,
+        fin: row.fin,
       }));
       
       res.json(eventos);
@@ -988,20 +987,19 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
   app.post("/api/juntas/eventos", async (req, res) => {
     try {
-      const { titulo, descripcion, fecha, horaInicio, horaFin, color, estado } = req.body;
+      const { titulo, descripcion, fecha, inicio, fin, color } = req.body;
       
       const insertData = {
         titulo,
         descripcion: descripcion || null,
         fecha,
-        hora_inicio: horaInicio || null,
-        hora_fin: horaFin || null,
         color: color || "#3b82f6",
-        estado: estado || "PENDIENTE",
+        inicio: inicio || null,
+        fin: fin || null,
       };
 
       const { data, error } = await supabase
-        .from("juntas_eventos")
+        .from("eventos")
         .insert(insertData)
         .select()
         .single();
@@ -1015,10 +1013,9 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         titulo: data.titulo,
         descripcion: data.descripcion,
         fecha: data.fecha,
-        horaInicio: data.hora_inicio,
-        horaFin: data.hora_fin,
         color: data.color,
-        estado: data.estado,
+        inicio: data.inicio,
+        fin: data.fin,
       };
 
       res.status(201).json(evento);
@@ -1027,13 +1024,12 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     }
   });
 
-  // Objetivos
+  // Objetivos (Supabase table "objetivos")
   app.get("/api/juntas/objetivos", async (_req, res) => {
     try {
       const { data, error } = await supabase
-        .from("juntas_objetivos")
-        .select("*")
-        .order("estado", { ascending: true });
+        .from("objetivos")
+        .select("*");
       
       if (error) {
         return res.status(500).json({ error: error.message });
@@ -1043,9 +1039,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         id: row.id,
         titulo: row.titulo,
         descripcion: row.descripcion,
-        fechaLimite: row.fecha_limite,
-        progreso: row.progreso,
-        estado: row.estado,
+        fecha: row.fecha,
       }));
       
       res.json(objetivos);
@@ -1056,18 +1050,16 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
 
   app.post("/api/juntas/objetivos", async (req, res) => {
     try {
-      const { titulo, descripcion, fechaLimite, progreso, estado } = req.body;
+      const { titulo, descripcion, fecha } = req.body;
       
       const insertData = {
         titulo,
         descripcion: descripcion || null,
-        fecha_limite: fechaLimite || null,
-        progreso: progreso || 0,
-        estado: estado || "ACTIVO",
+        fecha: fecha || null,
       };
 
       const { data, error } = await supabase
-        .from("juntas_objetivos")
+        .from("objetivos")
         .insert(insertData)
         .select()
         .single();
@@ -1080,9 +1072,7 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
         id: data.id,
         titulo: data.titulo,
         descripcion: data.descripcion,
-        fechaLimite: data.fecha_limite,
-        progreso: data.progreso,
-        estado: data.estado,
+        fecha: data.fecha,
       };
 
       res.status(201).json(objetivo);

@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
@@ -157,7 +156,7 @@ export default function JuntasLayout() {
       const eventDate = new Date(e.fecha);
       return weekDates.some(d => formatDate(d) === formatDate(eventDate));
     }).length,
-    objetivosActivos: objetivos.filter(o => o.estado === "ACTIVO").length,
+    totalObjetivos: objetivos.length,
   };
 
   return (
@@ -218,8 +217,8 @@ export default function JuntasLayout() {
                 <Target className="w-5 h-5 text-emerald-400" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Objetivos Activos</p>
-                <p className="text-2xl font-bold text-emerald-400" data-testid="stat-objetivos">{stats.objetivosActivos}</p>
+                <p className="text-xs text-muted-foreground">Total Objetivos</p>
+                <p className="text-2xl font-bold text-emerald-400" data-testid="stat-objetivos">{stats.totalObjetivos}</p>
               </div>
             </div>
           </Card>
@@ -277,10 +276,9 @@ export default function JuntasLayout() {
                         titulo: formData.get("titulo") as string,
                         descripcion: formData.get("descripcion") as string,
                         fecha: formData.get("fecha") as string,
-                        horaInicio: formData.get("horaInicio") as string,
-                        horaFin: formData.get("horaFin") as string,
+                        inicio: formData.get("inicio") as string,
+                        fin: formData.get("fin") as string,
                         color: formData.get("color") as string,
-                        estado: "PENDIENTE",
                       });
                     }} className="space-y-4">
                       <div className="space-y-2">
@@ -317,12 +315,12 @@ export default function JuntasLayout() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="horaInicio">Hora Inicio</Label>
-                          <Input id="horaInicio" name="horaInicio" type="time" data-testid="input-event-hora-inicio" />
+                          <Label htmlFor="inicio">Hora Inicio</Label>
+                          <Input id="inicio" name="inicio" type="time" data-testid="input-event-hora-inicio" />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="horaFin">Hora Fin</Label>
-                          <Input id="horaFin" name="horaFin" type="time" data-testid="input-event-hora-fin" />
+                          <Label htmlFor="fin">Hora Fin</Label>
+                          <Input id="fin" name="fin" type="time" data-testid="input-event-hora-fin" />
                         </div>
                       </div>
                       <Button type="submit" className="w-full" disabled={createEventoMutation.isPending} data-testid="button-submit-event">
@@ -372,7 +370,7 @@ export default function JuntasLayout() {
                               <div 
                                 key={i} 
                                 className="w-2 h-2 rounded-full" 
-                                style={{ backgroundColor: e.color }}
+                                style={{ backgroundColor: e.color || "#3b82f6" }}
                                 title={e.titulo}
                               />
                             ))}
@@ -397,19 +395,16 @@ export default function JuntasLayout() {
               ) : (
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {eventosDelDia.map(evento => (
-                    <div key={evento.id} className="p-4 rounded-md bg-muted/30 border-l-4" style={{ borderLeftColor: evento.color }}>
+                    <div key={evento.id} className="p-4 rounded-md bg-muted/30 border-l-4" style={{ borderLeftColor: evento.color || "#3b82f6" }}>
                       <h4 className="font-semibold text-foreground">{evento.titulo}</h4>
-                      {evento.horaInicio && (
+                      {evento.inicio && (
                         <p className="text-sm text-muted-foreground mt-1">
-                          {evento.horaInicio} - {evento.horaFin || "Sin hora fin"}
+                          {evento.inicio} - {evento.fin || "Sin hora fin"}
                         </p>
                       )}
                       {evento.descripcion && (
                         <p className="text-sm text-muted-foreground mt-2">{evento.descripcion}</p>
                       )}
-                      <Badge variant="outline" className={`mt-3 ${STATUS_COLORS[evento.estado]}`}>
-                        {evento.estado}
-                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -438,9 +433,7 @@ export default function JuntasLayout() {
                       createObjetivoMutation.mutate({
                         titulo: formData.get("titulo") as string,
                         descripcion: formData.get("descripcion") as string,
-                        fechaLimite: formData.get("fechaLimite") as string,
-                        progreso: 0,
-                        estado: "ACTIVO",
+                        fecha: formData.get("fecha") as string,
                       });
                     }} className="space-y-4">
                       <div className="space-y-2">
@@ -452,8 +445,8 @@ export default function JuntasLayout() {
                         <Textarea id="descripcion" name="descripcion" data-testid="input-objetivo-descripcion" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="fechaLimite">Fecha Límite</Label>
-                        <Input id="fechaLimite" name="fechaLimite" type="date" data-testid="input-objetivo-fecha" />
+                        <Label htmlFor="fecha">Fecha</Label>
+                        <Input id="fecha" name="fecha" type="date" data-testid="input-objetivo-fecha" />
                       </div>
                       <Button type="submit" className="w-full" disabled={createObjetivoMutation.isPending} data-testid="button-submit-objetivo">
                         {createObjetivoMutation.isPending ? "Guardando..." : "Guardar Objetivo"}
@@ -466,22 +459,12 @@ export default function JuntasLayout() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {objetivos.map(objetivo => (
                   <Card key={objetivo.id} className="p-4 hover-elevate" data-testid={`card-objetivo-${objetivo.id}`}>
-                    <div className="flex items-start justify-between mb-3">
-                      <h4 className="font-semibold text-foreground">{objetivo.titulo}</h4>
-                      <Badge variant="outline" className={STATUS_COLORS[objetivo.estado]}>{objetivo.estado}</Badge>
-                    </div>
+                    <h4 className="font-semibold text-foreground mb-2">{objetivo.titulo}</h4>
                     {objetivo.descripcion && (
-                      <p className="text-sm text-muted-foreground mb-3">{objetivo.descripcion}</p>
+                      <p className="text-sm text-muted-foreground mb-2">{objetivo.descripcion}</p>
                     )}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Progreso</span>
-                        <span className="font-medium text-emerald-400">{objetivo.progreso}%</span>
-                      </div>
-                      <Progress value={objetivo.progreso} className="h-2" />
-                    </div>
-                    {objetivo.fechaLimite && (
-                      <p className="text-xs text-muted-foreground mt-3">Fecha límite: {objetivo.fechaLimite}</p>
+                    {objetivo.fecha && (
+                      <p className="text-xs text-muted-foreground">Fecha: {objetivo.fecha}</p>
                     )}
                   </Card>
                 ))}
