@@ -14,7 +14,7 @@ import { ExpedienteDialog } from "@/components/expediente-dialog";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { type Expediente, type InsertExpediente, SOLICITUD_TYPES, UBICACION_TYPES, type UbicacionType, type SolicitudType } from "@shared/schema";
+import { type Expediente, type InsertExpediente, SOLICITUD_TYPES, UBICACION_TYPES, NIVEL_CREACIONES_TYPES, type UbicacionType, type SolicitudType, type NivelCreacionesType } from "@shared/schema";
 import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
 
 const ITEMS_PER_PAGE = 10;
@@ -26,6 +26,7 @@ export default function CreacionesHome() {
   const [showFilters, setShowFilters] = useState(false);
   const [ubicacionFilter, setUbicacionFilter] = useState<UbicacionType | "all">("all");
   const [solicitudFilter, setSolicitudFilter] = useState<SolicitudType | "all">("all");
+  const [nivelFilter, setNivelFilter] = useState<NivelCreacionesType | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -121,9 +122,10 @@ export default function CreacionesHome() {
         exp.comentario.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesUbicacion = ubicacionFilter === "all" || exp.ubicacion === ubicacionFilter;
       const matchesSolicitud = solicitudFilter === "all" || exp.solicita === solicitudFilter;
-      return matchesSearch && matchesUbicacion && matchesSolicitud;
+      const matchesNivel = nivelFilter === "all" || exp.nivel === nivelFilter;
+      return matchesSearch && matchesUbicacion && matchesSolicitud && matchesNivel;
     });
-  }, [expedientes, searchQuery, ubicacionFilter, solicitudFilter]);
+  }, [expedientes, searchQuery, ubicacionFilter, solicitudFilter, nivelFilter]);
 
   const totalPages = Math.ceil(filteredExpedientes.length / ITEMS_PER_PAGE);
   const paginatedExpedientes = useMemo(() => {
@@ -133,15 +135,21 @@ export default function CreacionesHome() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, ubicacionFilter, solicitudFilter]);
+  }, [searchQuery, ubicacionFilter, solicitudFilter, nivelFilter]);
 
   const ubicacionStats = useMemo(() => {
-    const counts: Record<UbicacionType, number> = {} as Record<UbicacionType, number>;
-    UBICACION_TYPES.forEach(ubicacion => {
-      counts[ubicacion] = expedientes.filter(e => e.ubicacion === ubicacion).length;
+    const counts: Record<string, number> = {};
+    expedientes.forEach(e => {
+      if (e.ubicacion) {
+        counts[e.ubicacion] = (counts[e.ubicacion] || 0) + 1;
+      }
     });
     return counts;
   }, [expedientes]);
+
+  const existingUbicaciones = useMemo(() => {
+    return Object.keys(ubicacionStats).filter(ub => ubicacionStats[ub] > 0);
+  }, [ubicacionStats]);
 
   const handleOpenCreate = () => {
     setSelectedExpediente(null);
@@ -175,10 +183,11 @@ export default function CreacionesHome() {
   const clearFilters = () => {
     setUbicacionFilter("all");
     setSolicitudFilter("all");
+    setNivelFilter("all");
     setSearchQuery("");
   };
 
-  const hasActiveFilters = ubicacionFilter !== "all" || solicitudFilter !== "all" || searchQuery !== "";
+  const hasActiveFilters = ubicacionFilter !== "all" || solicitudFilter !== "all" || nivelFilter !== "all" || searchQuery !== "";
 
   useEffect(() => {
     const authModule = localStorage.getItem("authModule");
@@ -220,24 +229,26 @@ export default function CreacionesHome() {
 
       {/* Main Content */}
       <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-8">
-        {/* Ubicación Counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
-          {UBICACION_TYPES.map((ubicacion) => (
-            <Card 
-              key={ubicacion} 
-              className={`p-4 cursor-pointer transition-all hover-elevate ${ubicacionFilter === ubicacion ? 'ring-2 ring-primary' : ''}`}
-              onClick={() => setUbicacionFilter(ubicacionFilter === ubicacion ? "all" : ubicacion)}
-              data-testid={`counter-${ubicacion}`}
-            >
-              <div className="text-center">
-                <span className="text-2xl font-bold text-foreground" data-testid={`stat-value-${ubicacion}`}>
-                  {ubicacionStats[ubicacion] || 0}
-                </span>
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{ubicacion}</p>
-              </div>
-            </Card>
-          ))}
-        </div>
+        {/* Ubicación Counters - solo las que existen en la tabla */}
+        {existingUbicaciones.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-8">
+            {existingUbicaciones.map((ubicacion) => (
+              <Card 
+                key={ubicacion} 
+                className={`p-4 cursor-pointer transition-all hover-elevate ${ubicacionFilter === ubicacion ? 'ring-2 ring-primary' : ''}`}
+                onClick={() => setUbicacionFilter(ubicacionFilter === ubicacion ? "all" : ubicacion as UbicacionType)}
+                data-testid={`counter-${ubicacion}`}
+              >
+                <div className="text-center">
+                  <span className="text-2xl font-bold text-foreground" data-testid={`stat-value-${ubicacion}`}>
+                    {ubicacionStats[ubicacion] || 0}
+                  </span>
+                  <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{ubicacion}</p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Action Bar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
@@ -277,7 +288,7 @@ export default function CreacionesHome() {
               Filtros
               {hasActiveFilters && (
                 <span className="ml-2 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
-                  {(ubicacionFilter !== "all" ? 1 : 0) + (solicitudFilter !== "all" ? 1 : 0)}
+                  {(ubicacionFilter !== "all" ? 1 : 0) + (solicitudFilter !== "all" ? 1 : 0) + (nivelFilter !== "all" ? 1 : 0)}
                 </span>
               )}
             </Button>
@@ -292,7 +303,21 @@ export default function CreacionesHome() {
         {/* Filters Panel */}
         {showFilters && (
           <Card className="p-4 mb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">Nivel</label>
+                <Select value={nivelFilter} onValueChange={(val) => setNivelFilter(val as NivelCreacionesType | "all")}>
+                  <SelectTrigger data-testid="filter-nivel">
+                    <SelectValue placeholder="Todos los niveles" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos los niveles</SelectItem>
+                    {NIVEL_CREACIONES_TYPES.map((nivel) => (
+                      <SelectItem key={nivel} value={nivel}>{nivel}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Ubicación</label>
                 <Select value={ubicacionFilter} onValueChange={(val) => setUbicacionFilter(val as UbicacionType | "all")}>
