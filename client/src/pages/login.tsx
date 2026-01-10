@@ -30,8 +30,10 @@ export default function Login() {
         setLocation("/creaciones");
       } else if (data.module === "COBERTURA") {
         setLocation("/cobertura");
-      } else {
+      } else if (data.module === "TITULARIZACIONES") {
         setLocation("/titularizaciones");
+      } else if (data.module === "INFORMES") {
+        setLocation("/informes");
       }
     },
     onError: () => {
@@ -69,7 +71,7 @@ export default function Login() {
                 <p className="text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-4 gap-3">
                 <div
                   className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
                     selectedModule === "CREACIONES" ? "ring-2 ring-primary bg-muted" : ""
@@ -117,6 +119,22 @@ export default function Login() {
                     <p className="text-xs text-muted-foreground mt-1">Estadísticas</p>
                   </div>
                 </div>
+
+                <div
+                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                    selectedModule === "INFORMES" ? "ring-2 ring-primary bg-muted" : ""
+                  }`}
+                  onClick={() => setSelectedModule("INFORMES")}
+                  data-testid="card-module-informes"
+                >
+                  <div className="text-center">
+                    <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
+                      <Lock className="w-5 h-5 text-muted-foreground" />
+                    </div>
+                    <h3 className="font-semibold text-foreground text-sm">INFORMES</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Actividades</p>
+                  </div>
+                </div>
               </div>
 
               {selectedModule && (
@@ -124,6 +142,12 @@ export default function Login() {
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">
                       Ingrese el PIN para <span className="font-semibold text-foreground">{selectedModule === "COBERTURA" ? "PUBLICACIONES" : selectedModule}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground/70 mt-1">
+                      {selectedModule === "CREACIONES" && "4 usuarios autorizados"}
+                      {selectedModule === "COBERTURA" && "6 usuarios autorizados"}
+                      {selectedModule === "TITULARIZACIONES" && "2 usuarios autorizados"}
+                      {selectedModule === "INFORMES" && "2 usuarios autorizados"}
                     </p>
                   </div>
                   <div className="space-y-2">

@@ -866,4 +866,79 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       res.status(500).json({ error: "Error al generar el informe" });
     }
   });
+
+  // ==================== INFORMES (Actividades del Sistema) ====================
+  app.get("/api/informes/actividades", async (_req, res) => {
+    try {
+      const { data, error } = await supabase
+        .from("actividades_log")
+        .select("*")
+        .order("fecha", { ascending: false })
+        .order("hora", { ascending: false });
+      
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      
+      const actividades = (data || []).map((row: any) => ({
+        id: row.id,
+        usuario: row.usuario,
+        modulo: row.modulo,
+        tipoActividad: row.tipo_actividad,
+        descripcion: row.descripcion,
+        fecha: row.fecha,
+        hora: row.hora,
+        detalles: row.detalles,
+      }));
+      
+      res.json(actividades);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener actividades" });
+    }
+  });
+
+  app.post("/api/informes/actividades", async (req, res) => {
+    try {
+      const { usuario, modulo, tipoActividad, descripcion, detalles } = req.body;
+      
+      const now = new Date();
+      const fecha = now.toISOString().split('T')[0];
+      const hora = now.toTimeString().split(' ')[0].substring(0, 5);
+      
+      const insertData = {
+        usuario,
+        modulo,
+        tipo_actividad: tipoActividad,
+        descripcion,
+        fecha,
+        hora,
+        detalles: detalles || null,
+      };
+
+      const { data, error } = await supabase
+        .from("actividades_log")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      const actividad = {
+        id: data.id,
+        usuario: data.usuario,
+        modulo: data.modulo,
+        tipoActividad: data.tipo_actividad,
+        descripcion: data.descripcion,
+        fecha: data.fecha,
+        hora: data.hora,
+        detalles: data.detalles,
+      };
+
+      res.status(201).json(actividad);
+    } catch (error) {
+      res.status(500).json({ error: "Error al registrar actividad" });
+    }
+  });
 }

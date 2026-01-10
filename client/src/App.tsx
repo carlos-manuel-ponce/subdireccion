@@ -7,6 +7,7 @@ import Login from "@/pages/login";
 import CreacionesHome from "@/pages/creaciones";
 import CoberturaLayout from "@/pages/cobertura/layout";
 import TitularizacionesLayout from "@/pages/titularizaciones/layout";
+import InformesLayout from "@/pages/informes/layout";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/cobertura/:tab" component={CoberturaLayout} />
       <Route path="/titularizaciones" component={TitularizacionesLayout} />
       <Route path="/titularizaciones/:tab" component={TitularizacionesLayout} />
+      <Route path="/informes" component={InformesLayout} />
       <Route component={NotFound} />
     </Switch>
   );
