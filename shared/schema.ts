@@ -97,8 +97,22 @@ export const JUNTA_TYPES = ["INICIAL Y PRIMARIA", "SECUNDARIA"] as const;
 export type JuntaType = (typeof JUNTA_TYPES)[number];
 
 // Nomenclador de Módulos para Login
-export const MODULE_TYPES = ["CREACIONES", "COBERTURA", "TITULARIZACIONES"] as const;
+export const MODULE_TYPES = ["CREACIONES", "COBERTURA", "TITULARIZACIONES", "INFORMES"] as const;
 export type ModuleType = (typeof MODULE_TYPES)[number];
+
+// Nomenclador de Tipos de Actividad para el módulo INFORMES
+export const ACTIVIDAD_TYPES = [
+  "CARGA_EXPEDIENTE",
+  "EDICION_EXPEDIENTE",
+  "ELIMINACION_EXPEDIENTE",
+  "GENERACION_INFORME",
+  "CARGA_REGISTRO",
+  "EDICION_REGISTRO",
+  "ELIMINACION_REGISTRO",
+  "INICIO_SESION",
+  "CIERRE_SESION",
+] as const;
+export type ActividadType = (typeof ACTIVIDAD_TYPES)[number];
 
 // Nomenclador de Tipos de Titularización
 export const TITULARIZACION_TYPES = [
@@ -226,6 +240,23 @@ export type TitularizacionEstadistica = typeof titularizacionEstadisticas.$infer
 export const insertTitularizacionRegistroSchema = createInsertSchema(titularizacionRegistros).omit({ id: true });
 export type InsertTitularizacionRegistro = z.infer<typeof insertTitularizacionRegistroSchema>;
 export type TitularizacionRegistro = typeof titularizacionRegistros.$inferSelect;
+
+// Tabla de Actividades (módulo INFORMES)
+export const actividadesLog = pgTable("actividades_log", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  usuario: text("usuario").notNull(),
+  modulo: text("modulo").notNull(),
+  tipoActividad: text("tipo_actividad").notNull(),
+  descripcion: text("descripcion").notNull(),
+  fecha: text("fecha").notNull(),
+  hora: text("hora").notNull(),
+  detalles: text("detalles"),
+});
+
+// Actividades Log
+export const insertActividadLogSchema = createInsertSchema(actividadesLog).omit({ id: true });
+export type InsertActividadLog = z.infer<typeof insertActividadLogSchema>;
+export type ActividadLog = typeof actividadesLog.$inferSelect;
 
 // Login Schema
 export const loginSchema = z.object({

@@ -283,6 +283,11 @@ const TITULARIZACIONES_USERS: Array<{ name: string; pin: string }> = [
   { name: "Manuel Ponce", pin: "1111" },
 ];
 
+const INFORMES_USERS: Array<{ name: string; pin: string }> = [
+  { name: "Nancy Carrizo", pin: "3087" },
+  { name: "Manuel Ponce", pin: "1111" },
+];
+
 export async function registerRoutes(server: Server, app: Express): Promise<void> {
   // ==================== AUTH ====================
   app.post("/api/auth/login", async (req, res) => {
@@ -312,6 +317,14 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       
       if (module === "TITULARIZACIONES") {
         const user = TITULARIZACIONES_USERS.find(u => u.pin === pin);
+        if (!user) {
+          return res.status(401).json({ error: "PIN incorrecto" });
+        }
+        return res.json({ success: true, module, userName: user.name });
+      }
+
+      if (module === "INFORMES") {
+        const user = INFORMES_USERS.find(u => u.pin === pin);
         if (!user) {
           return res.status(401).json({ error: "PIN incorrecto" });
         }
