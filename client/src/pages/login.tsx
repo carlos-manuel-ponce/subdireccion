@@ -23,6 +23,9 @@ export default function Login() {
     },
     onSuccess: (data) => {
       localStorage.setItem("authModule", data.module);
+      if (data.userName) {
+        localStorage.setItem("authUserName", data.userName);
+      }
       if (data.module === "CREACIONES") {
         setLocation("/creaciones");
       } else if (data.module === "COBERTURA") {

@@ -263,10 +263,16 @@ const upload = multer({
 });
 
 const PIN_CREDENTIALS: Record<string, string> = {
-  CREACIONES: "1111",
   COBERTURA: "1212",
   TITULARIZACIONES: "1313",
 };
+
+const CREACIONES_USERS: Array<{ name: string; pin: string }> = [
+  { name: "Nancy Carrizo", pin: "3087" },
+  { name: "Magdalena Martinez", pin: "2314" },
+  { name: "Antonella Escudero", pin: "1609" },
+  { name: "Manuel Ponce", pin: "1111" },
+];
 
 export async function registerRoutes(server: Server, app: Express): Promise<void> {
   // ==================== AUTH ====================
@@ -278,8 +284,16 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
       }
 
       const { module, pin } = result.data;
+      
+      if (module === "CREACIONES") {
+        const user = CREACIONES_USERS.find(u => u.pin === pin);
+        if (!user) {
+          return res.status(401).json({ error: "PIN incorrecto" });
+        }
+        return res.json({ success: true, module, userName: user.name });
+      }
+      
       const correctPin = PIN_CREDENTIALS[module];
-
       if (pin !== correctPin) {
         return res.status(401).json({ error: "PIN incorrecto" });
       }
