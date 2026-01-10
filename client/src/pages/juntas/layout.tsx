@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRoute, useLocation } from "wouter";
-import { Calendar as CalendarIcon, Target, FolderKanban, List, LogOut, Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, Target, List, LogOut, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -16,9 +16,9 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
-import type { JuntasEvento, JuntasObjetivo, JuntasProyecto } from "@shared/schema";
+import type { JuntasEvento, JuntasObjetivo } from "@shared/schema";
 
-type TabType = "calendario" | "agenda" | "objetivos" | "proyectos";
+type TabType = "calendario" | "agenda" | "objetivos";
 type ViewType = "dia" | "semana" | "mes";
 
 const COLORS = [
@@ -51,7 +51,6 @@ export default function JuntasLayout() {
   const [viewType, setViewType] = useState<ViewType>("mes");
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [isObjetivoDialogOpen, setIsObjetivoDialogOpen] = useState(false);
-  const [isProyectoDialogOpen, setIsProyectoDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -64,7 +63,7 @@ export default function JuntasLayout() {
   useEffect(() => {
     if (match && params?.tab) {
       const tab = params.tab as TabType;
-      if (["calendario", "agenda", "objetivos", "proyectos"].includes(tab)) {
+      if (["calendario", "agenda", "objetivos"].includes(tab)) {
         setActiveTab(tab);
       }
     }
@@ -76,10 +75,6 @@ export default function JuntasLayout() {
 
   const { data: objetivos = [] } = useQuery<JuntasObjetivo[]>({
     queryKey: ["/api/juntas/objetivos"],
-  });
-
-  const { data: proyectos = [] } = useQuery<JuntasProyecto[]>({
-    queryKey: ["/api/juntas/proyectos"],
   });
 
   const createEventoMutation = useMutation({
@@ -103,18 +98,6 @@ export default function JuntasLayout() {
       queryClient.invalidateQueries({ queryKey: ["/api/juntas/objetivos"] });
       setIsObjetivoDialogOpen(false);
       toast({ title: "Objetivo creado", description: "El objetivo fue agregado" });
-    },
-  });
-
-  const createProyectoMutation = useMutation({
-    mutationFn: async (data: Partial<JuntasProyecto>) => {
-      const response = await apiRequest("POST", "/api/juntas/proyectos", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/juntas/proyectos"] });
-      setIsProyectoDialogOpen(false);
-      toast({ title: "Proyecto creado", description: "El proyecto fue agregado" });
     },
   });
 
@@ -154,7 +137,7 @@ export default function JuntasLayout() {
       return weekDates.some(d => formatDate(d) === formatDate(eventDate));
     }).length,
     objetivosActivos: objetivos.filter(o => o.estado === "ACTIVO").length,
-    proyectosEnCurso: proyectos.filter(p => p.estado === "EN_CURSO" || p.estado === "PLANIFICACION").length,
+    objetivosCompletados: objetivos.filter(o => o.estado === "COMPLETADO").length,
   };
 
   return (
@@ -165,7 +148,7 @@ export default function JuntasLayout() {
             <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-juntas-title">
               JUNTAS DE CLASIFICACIÓN
             </h1>
-            <p className="text-sm text-muted-foreground">CALENDARIO Y GESTIÓN DE PROYECTOS</p>
+            <p className="text-sm text-muted-foreground">CALENDARIO Y OBJETIVOS</p>
           </div>
           <div className="flex-1 flex justify-center">
             <img 
@@ -223,18 +206,18 @@ export default function JuntasLayout() {
           <Card className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-md bg-amber-500/10">
-                <FolderKanban className="w-5 h-5 text-amber-400" />
+                <Target className="w-5 h-5 text-amber-400" />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Proyectos</p>
-                <p className="text-2xl font-bold text-amber-400" data-testid="stat-proyectos">{stats.proyectosEnCurso}</p>
+                <p className="text-xs text-muted-foreground">Completados</p>
+                <p className="text-2xl font-bold text-amber-400" data-testid="stat-completados">{stats.objetivosCompletados}</p>
               </div>
             </div>
           </Card>
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-3 max-w-xl">
             <TabsTrigger value="calendario" data-testid="tab-calendario">
               <CalendarIcon className="mr-2 h-4 w-4" />
               Calendario
@@ -247,15 +230,11 @@ export default function JuntasLayout() {
               <Target className="mr-2 h-4 w-4" />
               Objetivos
             </TabsTrigger>
-            <TabsTrigger value="proyectos" data-testid="tab-proyectos">
-              <FolderKanban className="mr-2 h-4 w-4" />
-              Proyectos
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="calendario">
-            <div className="grid md:grid-cols-3 gap-6">
-              <Card className="md:col-span-2 p-4">
+            <div className="grid lg:grid-cols-4 gap-6">
+              <Card className="lg:col-span-3 p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-semibold text-foreground">Calendario</h3>
                   <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
@@ -549,105 +528,6 @@ export default function JuntasLayout() {
                 ))}
                 {objetivos.length === 0 && (
                   <p className="text-muted-foreground col-span-full text-center py-8">No hay objetivos registrados</p>
-                )}
-              </div>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="proyectos">
-            <Card className="p-4">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-semibold text-foreground">Proyectos</h3>
-                <Dialog open={isProyectoDialogOpen} onOpenChange={setIsProyectoDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" data-testid="button-add-proyecto">
-                      <Plus className="mr-2 h-4 w-4" />
-                      Nuevo Proyecto
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Nuevo Proyecto</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={(e) => {
-                      e.preventDefault();
-                      const formData = new FormData(e.currentTarget);
-                      createProyectoMutation.mutate({
-                        nombre: formData.get("nombre") as string,
-                        descripcion: formData.get("descripcion") as string,
-                        fechaInicio: formData.get("fechaInicio") as string,
-                        fechaFin: formData.get("fechaFin") as string,
-                        prioridad: formData.get("prioridad") as string,
-                        estado: "PLANIFICACION",
-                      });
-                    }} className="space-y-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="nombre">Nombre del Proyecto</Label>
-                        <Input id="nombre" name="nombre" required data-testid="input-proyecto-nombre" />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="descripcion">Descripción</Label>
-                        <Textarea id="descripcion" name="descripcion" data-testid="input-proyecto-descripcion" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="fechaInicio">Fecha Inicio</Label>
-                          <Input id="fechaInicio" name="fechaInicio" type="date" data-testid="input-proyecto-fecha-inicio" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="fechaFin">Fecha Fin</Label>
-                          <Input id="fechaFin" name="fechaFin" type="date" data-testid="input-proyecto-fecha-fin" />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="prioridad">Prioridad</Label>
-                        <Select name="prioridad" defaultValue="MEDIA">
-                          <SelectTrigger data-testid="select-proyecto-prioridad">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ALTA">Alta</SelectItem>
-                            <SelectItem value="MEDIA">Media</SelectItem>
-                            <SelectItem value="BAJA">Baja</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <Button type="submit" className="w-full" disabled={createProyectoMutation.isPending} data-testid="button-submit-proyecto">
-                        {createProyectoMutation.isPending ? "Guardando..." : "Guardar Proyecto"}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </div>
-
-              <div className="space-y-4">
-                {proyectos.map(proyecto => (
-                  <Card key={proyecto.id} className="p-4 hover-elevate" data-testid={`card-proyecto-${proyecto.id}`}>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold text-foreground">{proyecto.nombre}</h4>
-                          <Badge variant="outline" className={
-                            proyecto.prioridad === "ALTA" ? "text-red-400" :
-                            proyecto.prioridad === "MEDIA" ? "text-amber-400" : "text-blue-400"
-                          }>
-                            {proyecto.prioridad}
-                          </Badge>
-                        </div>
-                        {proyecto.descripcion && (
-                          <p className="text-sm text-muted-foreground mb-2">{proyecto.descripcion}</p>
-                        )}
-                        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                          {proyecto.fechaInicio && <span>Inicio: {proyecto.fechaInicio}</span>}
-                          {proyecto.fechaFin && <span>Fin: {proyecto.fechaFin}</span>}
-                        </div>
-                      </div>
-                      <Badge variant="outline" className={STATUS_COLORS[proyecto.estado]}>{proyecto.estado}</Badge>
-                    </div>
-                  </Card>
-                ))}
-                {proyectos.length === 0 && (
-                  <p className="text-muted-foreground text-center py-8">No hay proyectos registrados</p>
                 )}
               </div>
             </Card>
