@@ -116,6 +116,7 @@ export type TitularizacionType = (typeof TITULARIZACION_TYPES)[number];
 export const expedientes = pgTable("expedientes", {
   id: uuid("id").primaryKey().defaultRandom(),
   expediente: text("expediente").notNull(),
+  nivel: text("nivel").notNull().default(""),
   solicita: text("solicita").notNull(),
   establecimiento: text("establecimiento").notNull(),
   ubicacion: text("ubicacion").notNull(),

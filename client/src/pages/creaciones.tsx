@@ -338,6 +338,7 @@ export default function CreacionesHome() {
               <TableHeader>
                 <TableRow className="bg-muted/50 hover:bg-muted/50 border-b border-border">
                   <TableHead className="text-foreground font-medium w-[120px]">Expediente</TableHead>
+                  <TableHead className="text-foreground font-medium w-[100px]">Nivel</TableHead>
                   <TableHead className="text-foreground font-medium min-w-[280px]">Solicita</TableHead>
                   <TableHead className="text-foreground font-medium min-w-[200px]">Establecimiento</TableHead>
                   <TableHead className="text-foreground font-medium w-[140px]">Ubicación</TableHead>
@@ -350,6 +351,7 @@ export default function CreacionesHome() {
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}>
                       <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                       <TableCell><Skeleton className="h-5 w-24" /></TableCell>
@@ -359,7 +361,7 @@ export default function CreacionesHome() {
                   ))
                 ) : paginatedExpedientes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="h-32 text-center text-muted-foreground">
                       {hasActiveFilters ? "No se encontraron expedientes con los filtros aplicados." : "No hay expedientes registrados. Haga clic en \"Agregar Nuevo\" para crear uno."}
                     </TableCell>
                   </TableRow>
@@ -372,6 +374,9 @@ export default function CreacionesHome() {
                     >
                       <TableCell className="font-mono text-sm" data-testid={`text-expediente-${exp.id}`}>
                         {exp.expediente}
+                      </TableCell>
+                      <TableCell className="text-sm" data-testid={`text-nivel-${exp.id}`}>
+                        {exp.nivel || "—"}
                       </TableCell>
                       <TableCell className="text-sm" data-testid={`text-solicita-${exp.id}`}>
                         <Tooltip>

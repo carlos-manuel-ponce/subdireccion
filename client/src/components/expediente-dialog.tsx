@@ -23,6 +23,7 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
     resolver: zodResolver(insertExpedienteSchema),
     defaultValues: {
       expediente: "",
+      nivel: "",
       solicita: SOLICITUD_TYPES[0],
       establecimiento: "",
       ubicacion: UBICACION_TYPES[0],
@@ -35,6 +36,7 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
       if (expediente) {
         form.reset({
           expediente: expediente.expediente,
+          nivel: expediente.nivel || "",
           solicita: expediente.solicita,
           establecimiento: expediente.establecimiento,
           ubicacion: expediente.ubicacion,
@@ -43,6 +45,7 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
       } else {
         form.reset({
           expediente: "",
+          nivel: "",
           solicita: SOLICITUD_TYPES[0],
           establecimiento: "",
           ubicacion: UBICACION_TYPES[0],
@@ -79,6 +82,24 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
                       placeholder="1234567/26"
                       {...field}
                       data-testid="input-expediente"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="nivel"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nivel</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Nivel educativo"
+                      {...field}
+                      data-testid="input-nivel"
                     />
                   </FormControl>
                   <FormMessage />
