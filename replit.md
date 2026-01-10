@@ -1,11 +1,12 @@
 # Creaciones - Subdirección Cobertura de Cargos
 
 ## Overview
-This is a four-module management platform for educational institution records with user-based PIN authentication. The platform has permanent dark gray mode with professional analytics colors and includes:
+This is a five-module management platform for educational institution records with user-based PIN authentication. The platform has permanent dark gray mode with professional analytics colors and includes:
 1. **CREACIONES** (4 users) - Educational records (expedientes) management with ubicación counters, CRUD operations, search, and filters
 2. **PUBLICACIONES** (6 users, internal name COBERTURA) - Registration and statistics system with file uploads, interactive charts, and PDF reports
 3. **TITULARIZACIONES** (2 users) - Statistics dashboard with bar charts for 11 titularization types and searchable records table with PDF export
 4. **INFORMES** (2 users) - System-wide activity tracking module that logs all user actions across modules (logins, data loads, edits, report generation)
+5. **JUNTAS DE CLASIFICACIÓN** (2 users) - Calendar management with day/week/month agenda views, objectives tracking with progress bars, and projects management with priorities
 
 ## Recent Changes
 - 2026-01-01: Initial implementation of the platform with full CRUD functionality
@@ -16,6 +17,8 @@ This is a four-module management platform for educational institution records wi
 - 2026-01-10: Implemented user-based authentication with individual PINs per module
 - 2026-01-10: Added professional analytics color palette (violet, blue, emerald, amber)
 - 2026-01-10: Added INFORMES module for system-wide activity tracking
+- 2026-01-10: Added JUNTAS DE CLASIFICACIÓN module with calendar, agenda, objectives and projects
+- 2026-01-10: Fixed login page layout to responsive grid (2 cols mobile, 3 cols tablet, 5 cols desktop)
 
 ## Project Architecture
 
@@ -90,12 +93,37 @@ This is a four-module management platform for educational institution records wi
 ### ActividadLog (INFORMES module)
 - `id`: UUID
 - `usuario`: String (name of user who performed action)
-- `modulo`: String (CREACIONES, COBERTURA, TITULARIZACIONES, INFORMES)
+- `modulo`: String (CREACIONES, COBERTURA, TITULARIZACIONES, INFORMES, JUNTAS)
 - `tipoActividad`: ActividadType (9 types)
 - `descripcion`: String
 - `fecha`: String (YYYY-MM-DD)
 - `hora`: String (HH:MM)
 - `detalles`: String (nullable)
+
+### JuntasEvento (JUNTAS module)
+- `id`: UUID
+- `titulo`: String
+- `descripcion`: String (nullable)
+- `fecha`: String (YYYY-MM-DD)
+- `horaInicio`, `horaFin`: String (HH:MM, nullable)
+- `color`: String (hex color)
+- `estado`: TareaStatusType (PENDIENTE, EN_PROGRESO, COMPLETADA, CANCELADA)
+
+### JuntasObjetivo (JUNTAS module)
+- `id`: UUID
+- `titulo`: String
+- `descripcion`: String (nullable)
+- `fechaLimite`: String (YYYY-MM-DD, nullable)
+- `progreso`: Integer (0-100)
+- `estado`: ObjetivoStatusType (ACTIVO, COMPLETADO, PAUSADO)
+
+### JuntasProyecto (JUNTAS module)
+- `id`: UUID
+- `nombre`: String
+- `descripcion`: String (nullable)
+- `fechaInicio`, `fechaFin`: String (YYYY-MM-DD, nullable)
+- `estado`: ProyectoStatusType (PLANIFICACION, EN_CURSO, COMPLETADO, SUSPENDIDO)
+- `prioridad`: String (ALTA, MEDIA, BAJA)
 
 ### Nomenclador de Tipos de Actividad (9 types)
 - CARGA_EXPEDIENTE, EDICION_EXPEDIENTE, ELIMINACION_EXPEDIENTE
