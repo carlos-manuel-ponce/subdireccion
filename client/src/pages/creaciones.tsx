@@ -78,12 +78,13 @@ export default function CreacionesHome() {
 
   const generateReportMutation = useMutation({
     mutationFn: async () => {
+      const userName = localStorage.getItem("authUserName") || "Usuario del Sistema";
       const response = await fetch("/api/expedientes/report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 
           expedientes: filteredExpedientes,
-          userName: "Carlos Manuel Ponce"
+          userName
         }),
       });
       if (!response.ok) throw new Error("Error al generar el informe");
