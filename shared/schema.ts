@@ -35,21 +35,22 @@ export const SOLICITUD_TYPES = [
 
 export type SolicitudType = (typeof SOLICITUD_TYPES)[number];
 
-// Nomenclador de Ubicaciones (13 ubicaciones)
+// Nomenclador de Ubicaciones (14 ubicaciones)
 export const UBICACION_TYPES = [
-  "INICIAL",
-  "SECUNDARIO",
-  "OBLIGATORIA",
-  "LIQUIDACIONES",
-  "LEGAL Y TÉCNICA",
-  "DESPACHO",
-  "INNOVACIÓN",
-  "INFRAESTRUCTURA",
-  "GESTIÓN",
-  "HACIENDA",
-  "FIRMA MINISTRO",
-  "FIRMA INT.",
-  "FINALIZADO",
+  "Subdirección Educación Inicial",
+  "Subdirección Educación Primaria",
+  "Subdirección Educación Secundaria",
+  "Subdirección Estadísticas Educativas",
+  "Subdirección de Analisis y Liquidación",
+  "Consejo de Educación",
+  "Dirección Educación Obligatoria",
+  "Dirección de Infraestructura Escolar",
+  "Secretaría de Estado Legal y Técnica",
+  "Despacho - Educación",
+  "Hacienda e Infraestructura Pública",
+  "Firma Ministro",
+  "Creaciones",
+  "Finalizado",
 ] as const;
 
 export type UbicacionType = (typeof UBICACION_TYPES)[number];
