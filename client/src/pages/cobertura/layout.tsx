@@ -50,7 +50,7 @@ export default function CoberturaLayout() {
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
           <div className="flex-1">
             <h1 className="text-xl font-bold tracking-tight text-foreground" data-testid="text-cobertura-title">
-              COBERTURA DE CARGOS
+              PUBLICACIONES
             </h1>
             <p className="text-sm text-muted-foreground">SUBDIRECCIÓN COBERTURA DE CARGOS</p>
           </div>

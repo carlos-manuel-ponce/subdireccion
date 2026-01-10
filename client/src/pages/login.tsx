@@ -97,7 +97,7 @@ export default function Login() {
                     <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
                       <Lock className="w-5 h-5 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-sm">COBERTURA</h3>
+                    <h3 className="font-semibold text-foreground text-sm">PUBLICACIONES</h3>
                     <p className="text-xs text-muted-foreground mt-1">Registro</p>
                   </div>
                 </div>
@@ -123,7 +123,7 @@ export default function Login() {
                 <form onSubmit={handleSubmit} className="space-y-4 pt-4 border-t border-border">
                   <div className="text-center">
                     <p className="text-sm text-muted-foreground">
-                      Ingrese el PIN para <span className="font-semibold text-foreground">{selectedModule}</span>
+                      Ingrese el PIN para <span className="font-semibold text-foreground">{selectedModule === "COBERTURA" ? "PUBLICACIONES" : selectedModule}</span>
                     </p>
                   </div>
                   <div className="space-y-2">
