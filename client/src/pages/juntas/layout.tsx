@@ -237,6 +237,7 @@ export default function JuntasLayout() {
           </TabsList>
 
           <TabsContent value="calendario">
+            <div className="grid lg:grid-cols-[1fr_320px] gap-6">
             <Card className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-4">
@@ -386,14 +387,14 @@ export default function JuntasLayout() {
               </div>
             </Card>
 
-            <Card className="p-6 mt-6">
+            <Card className="p-6">
               <h3 className="font-semibold text-foreground mb-4">
                 Eventos del {selectedDate.toLocaleDateString("es-AR", { weekday: "long", day: "numeric", month: "long" })}
               </h3>
               {eventosDelDia.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No hay eventos programados para este día</p>
               ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="space-y-3">
                   {eventosDelDia.map(evento => (
                     <div key={evento.id} className="p-4 rounded-md bg-muted/30 border-l-4" style={{ borderLeftColor: evento.color || "#3b82f6" }}>
                       <h4 className="font-semibold text-foreground">{evento.titulo}</h4>
@@ -410,6 +411,7 @@ export default function JuntasLayout() {
                 </div>
               )}
             </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="objetivos">

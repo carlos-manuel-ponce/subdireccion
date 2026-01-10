@@ -73,9 +73,9 @@ export default function Login() {
                 <p className="text-muted-foreground">Seleccione un módulo e ingrese su PIN</p>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                 <div
-                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                  className={`p-3 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
                     selectedModule === "CREACIONES" ? "ring-2 ring-primary bg-muted" : ""
                   }`}
                   onClick={() => setSelectedModule("CREACIONES")}
@@ -85,13 +85,13 @@ export default function Login() {
                     <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
                       <Lock className="w-5 h-5 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-sm">CREACIONES</h3>
+                    <h3 className="font-semibold text-foreground text-xs leading-tight">CREACIONES</h3>
                     <p className="text-xs text-muted-foreground mt-1">Expedientes</p>
                   </div>
                 </div>
 
                 <div
-                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                  className={`p-3 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
                     selectedModule === "COBERTURA" ? "ring-2 ring-primary bg-muted" : ""
                   }`}
                   onClick={() => setSelectedModule("COBERTURA")}
@@ -101,13 +101,13 @@ export default function Login() {
                     <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
                       <Lock className="w-5 h-5 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-sm">PUBLICACIONES</h3>
+                    <h3 className="font-semibold text-foreground text-xs leading-tight">PUBLICACIONES</h3>
                     <p className="text-xs text-muted-foreground mt-1">Registro</p>
                   </div>
                 </div>
 
                 <div
-                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                  className={`p-3 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
                     selectedModule === "TITULARIZACIONES" ? "ring-2 ring-primary bg-muted" : ""
                   }`}
                   onClick={() => setSelectedModule("TITULARIZACIONES")}
@@ -117,13 +117,13 @@ export default function Login() {
                     <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
                       <Lock className="w-5 h-5 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-sm">TITULARIZACIONES</h3>
+                    <h3 className="font-semibold text-foreground text-xs leading-tight">TITULARIZACIONES</h3>
                     <p className="text-xs text-muted-foreground mt-1">Estadísticas</p>
                   </div>
                 </div>
 
                 <div
-                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                  className={`p-3 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
                     selectedModule === "INFORMES" ? "ring-2 ring-primary bg-muted" : ""
                   }`}
                   onClick={() => setSelectedModule("INFORMES")}
@@ -133,13 +133,13 @@ export default function Login() {
                     <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
                       <Lock className="w-5 h-5 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-sm">INFORMES</h3>
+                    <h3 className="font-semibold text-foreground text-xs leading-tight">INFORMES</h3>
                     <p className="text-xs text-muted-foreground mt-1">Actividades</p>
                   </div>
                 </div>
 
                 <div
-                  className={`p-4 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
+                  className={`p-3 rounded-md cursor-pointer transition-all hover-elevate bg-muted/50 ${
                     selectedModule === "JUNTAS" ? "ring-2 ring-primary bg-muted" : ""
                   }`}
                   onClick={() => setSelectedModule("JUNTAS")}
@@ -149,7 +149,7 @@ export default function Login() {
                     <div className="w-10 h-10 mx-auto mb-2 rounded-md bg-background flex items-center justify-center">
                       <Lock className="w-5 h-5 text-muted-foreground" />
                     </div>
-                    <h3 className="font-semibold text-foreground text-xs">JUNTAS DE CLASIFICACIÓN</h3>
+                    <h3 className="font-semibold text-foreground text-xs leading-tight">JUNTAS DE<br/>CLASIFICACIÓN</h3>
                     <p className="text-xs text-muted-foreground mt-1">Calendario</p>
                   </div>
                 </div>
