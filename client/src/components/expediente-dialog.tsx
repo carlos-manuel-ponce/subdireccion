@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { insertExpedienteSchema, SOLICITUD_TYPES, UBICACION_TYPES, type InsertExpediente, type Expediente } from "@shared/schema";
+import { insertExpedienteSchema, SOLICITUD_TYPES, UBICACION_TYPES, NIVEL_CREACIONES_TYPES, type InsertExpediente, type Expediente } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 
 interface ExpedienteDialogProps {
@@ -95,13 +95,20 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Nivel</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Nivel educativo"
-                      {...field}
-                      data-testid="input-nivel"
-                    />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-nivel">
+                        <SelectValue placeholder="Seleccionar nivel" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {NIVEL_CREACIONES_TYPES.map((nivel) => (
+                        <SelectItem key={nivel} value={nivel} data-testid={`option-nivel-${nivel}`}>
+                          {nivel}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

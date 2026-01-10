@@ -58,6 +58,10 @@ export type UbicacionType = (typeof UBICACION_TYPES)[number];
 export const REGION_TYPES = ["I", "II", "III", "IV", "V", "VI"] as const;
 export type RegionType = (typeof REGION_TYPES)[number];
 
+// Nomenclador de Nivel para Creaciones
+export const NIVEL_CREACIONES_TYPES = ["Inicial", "Primario", "Secundario"] as const;
+export type NivelCreacionesType = (typeof NIVEL_CREACIONES_TYPES)[number];
+
 // Nomenclador de Nivel para Cobertura
 export const NIVEL_COBERTURA_TYPES = ["INICIAL Y PRIMARIO", "SECUNDARIO"] as const;
 export type NivelCoberturaType = (typeof NIVEL_COBERTURA_TYPES)[number];

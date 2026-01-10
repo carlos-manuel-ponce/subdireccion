@@ -290,47 +290,152 @@ export async function registerRoutes(server: Server, app: Express): Promise<void
     }
   });
 
-  // ==================== EXPEDIENTES (CREACIONES) ====================
+  // ==================== EXPEDIENTES (CREACIONES) - Supabase tabla "creaciones" ====================
   app.get("/api/expedientes", async (_req, res) => {
-    const expedientes = await storage.getExpedientes();
-    res.json(expedientes);
+    try {
+      const { data, error } = await supabase
+        .from("creaciones")
+        .select("*")
+        .order("expediente", { ascending: true });
+      
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      
+      const expedientes = (data || []).map((row: any) => ({
+        id: row.id,
+        expediente: row.expediente,
+        nivel: row.nivel || "",
+        solicita: row.solicitud,
+        establecimiento: row.establecimiento,
+        ubicacion: row.ubicacion,
+        comentario: row.comentario || "",
+      }));
+      
+      res.json(expedientes);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener expedientes" });
+    }
   });
 
   app.get("/api/expedientes/:id", async (req, res) => {
-    const expediente = await storage.getExpediente(req.params.id);
-    if (!expediente) {
-      return res.status(404).json({ error: "Expediente no encontrado" });
+    try {
+      const { data, error } = await supabase
+        .from("creaciones")
+        .select("*")
+        .eq("id", req.params.id)
+        .single();
+      
+      if (error || !data) {
+        return res.status(404).json({ error: "Expediente no encontrado" });
+      }
+      
+      const expediente = {
+        id: data.id,
+        expediente: data.expediente,
+        nivel: data.nivel || "",
+        solicita: data.solicitud,
+        establecimiento: data.establecimiento,
+        ubicacion: data.ubicacion,
+        comentario: data.comentario || "",
+      };
+      
+      res.json(expediente);
+    } catch (error) {
+      res.status(500).json({ error: "Error al obtener expediente" });
     }
-    res.json(expediente);
   });
 
   app.post("/api/expedientes", async (req, res) => {
-    const result = insertExpedienteSchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({ error: fromError(result.error).message });
+    try {
+      const insertData = {
+        expediente: req.body.expediente,
+        nivel: req.body.nivel || "",
+        solicitud: req.body.solicita,
+        establecimiento: req.body.establecimiento,
+        ubicacion: req.body.ubicacion,
+        comentario: req.body.comentario || "",
+      };
+
+      const { data, error } = await supabase
+        .from("creaciones")
+        .insert(insertData)
+        .select()
+        .single();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      const expediente = {
+        id: data.id,
+        expediente: data.expediente,
+        nivel: data.nivel || "",
+        solicita: data.solicitud,
+        establecimiento: data.establecimiento,
+        ubicacion: data.ubicacion,
+        comentario: data.comentario || "",
+      };
+
+      res.status(201).json(expediente);
+    } catch (error) {
+      res.status(500).json({ error: "Error al crear expediente" });
     }
-    const expediente = await storage.createExpediente(result.data);
-    res.status(201).json(expediente);
   });
 
   app.put("/api/expedientes/:id", async (req, res) => {
-    const result = insertExpedienteSchema.safeParse(req.body);
-    if (!result.success) {
-      return res.status(400).json({ error: fromError(result.error).message });
+    try {
+      const updateData = {
+        expediente: req.body.expediente,
+        nivel: req.body.nivel || "",
+        solicitud: req.body.solicita,
+        establecimiento: req.body.establecimiento,
+        ubicacion: req.body.ubicacion,
+        comentario: req.body.comentario || "",
+      };
+
+      const { data, error } = await supabase
+        .from("creaciones")
+        .update(updateData)
+        .eq("id", req.params.id)
+        .select()
+        .single();
+
+      if (error) {
+        return res.status(404).json({ error: "Expediente no encontrado" });
+      }
+
+      const expediente = {
+        id: data.id,
+        expediente: data.expediente,
+        nivel: data.nivel || "",
+        solicita: data.solicitud,
+        establecimiento: data.establecimiento,
+        ubicacion: data.ubicacion,
+        comentario: data.comentario || "",
+      };
+
+      res.json(expediente);
+    } catch (error) {
+      res.status(500).json({ error: "Error al actualizar expediente" });
     }
-    const expediente = await storage.updateExpediente(req.params.id, result.data);
-    if (!expediente) {
-      return res.status(404).json({ error: "Expediente no encontrado" });
-    }
-    res.json(expediente);
   });
 
   app.delete("/api/expedientes/:id", async (req, res) => {
-    const deleted = await storage.deleteExpediente(req.params.id);
-    if (!deleted) {
-      return res.status(404).json({ error: "Expediente no encontrado" });
+    try {
+      const { error } = await supabase
+        .from("creaciones")
+        .delete()
+        .eq("id", req.params.id);
+
+      if (error) {
+        return res.status(404).json({ error: "Expediente no encontrado" });
+      }
+
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Error al eliminar expediente" });
     }
-    res.status(204).send();
   });
 
   app.post("/api/expedientes/report", async (req, res) => {
