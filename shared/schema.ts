@@ -35,7 +35,7 @@ export const SOLICITUD_TYPES = [
 
 export type SolicitudType = (typeof SOLICITUD_TYPES)[number];
 
-// Nomenclador de Ubicaciones (14 ubicaciones)
+// Nomenclador de Ubicaciones (15 ubicaciones)
 export const UBICACION_TYPES = [
   "Subdirección Educación Inicial",
   "Subdirección Educación Primaria",
@@ -50,6 +50,7 @@ export const UBICACION_TYPES = [
   "Hacienda e Infraestructura Pública",
   "Firma Ministro",
   "Creaciones",
+  "Establecimiento Educativo",
   "Finalizado",
 ] as const;
 

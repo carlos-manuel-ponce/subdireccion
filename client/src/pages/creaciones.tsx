@@ -14,7 +14,7 @@ import { ExpedienteDialog } from "@/components/expediente-dialog";
 import { DeleteDialog } from "@/components/delete-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { type Expediente, type InsertExpediente, SOLICITUD_TYPES, UBICACION_TYPES, NIVEL_CREACIONES_TYPES, type UbicacionType, type SolicitudType, type NivelCreacionesType } from "@shared/schema";
+import { type Expediente, type InsertExpediente, UBICACION_TYPES, NIVEL_CREACIONES_TYPES, type UbicacionType, type NivelCreacionesType } from "@shared/schema";
 import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
 
 const ITEMS_PER_PAGE = 10;
@@ -25,7 +25,6 @@ export default function CreacionesHome() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [ubicacionFilter, setUbicacionFilter] = useState<UbicacionType | "all">("all");
-  const [solicitudFilter, setSolicitudFilter] = useState<SolicitudType | "all">("all");
   const [nivelFilter, setNivelFilter] = useState<NivelCreacionesType | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -119,13 +118,13 @@ export default function CreacionesHome() {
       const matchesSearch = 
         exp.expediente.toLowerCase().includes(searchQuery.toLowerCase()) ||
         exp.establecimiento.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (exp.solicita || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
         exp.comentario.toLowerCase().includes(searchQuery.toLowerCase());
       const matchesUbicacion = ubicacionFilter === "all" || exp.ubicacion === ubicacionFilter;
-      const matchesSolicitud = solicitudFilter === "all" || exp.solicita === solicitudFilter;
       const matchesNivel = nivelFilter === "all" || exp.nivel === nivelFilter;
-      return matchesSearch && matchesUbicacion && matchesSolicitud && matchesNivel;
+      return matchesSearch && matchesUbicacion && matchesNivel;
     });
-  }, [expedientes, searchQuery, ubicacionFilter, solicitudFilter, nivelFilter]);
+  }, [expedientes, searchQuery, ubicacionFilter, nivelFilter]);
 
   const totalPages = Math.ceil(filteredExpedientes.length / ITEMS_PER_PAGE);
   const paginatedExpedientes = useMemo(() => {
@@ -135,7 +134,7 @@ export default function CreacionesHome() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, ubicacionFilter, solicitudFilter, nivelFilter]);
+  }, [searchQuery, ubicacionFilter, nivelFilter]);
 
   const ubicacionStats = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -182,12 +181,11 @@ export default function CreacionesHome() {
 
   const clearFilters = () => {
     setUbicacionFilter("all");
-    setSolicitudFilter("all");
     setNivelFilter("all");
     setSearchQuery("");
   };
 
-  const hasActiveFilters = ubicacionFilter !== "all" || solicitudFilter !== "all" || nivelFilter !== "all" || searchQuery !== "";
+  const hasActiveFilters = ubicacionFilter !== "all" || nivelFilter !== "all" || searchQuery !== "";
 
   useEffect(() => {
     const authModule = localStorage.getItem("authModule");
@@ -288,7 +286,7 @@ export default function CreacionesHome() {
               Filtros
               {hasActiveFilters && (
                 <span className="ml-2 bg-primary text-primary-foreground text-xs px-1.5 py-0.5 rounded-full">
-                  {(ubicacionFilter !== "all" ? 1 : 0) + (solicitudFilter !== "all" ? 1 : 0) + (nivelFilter !== "all" ? 1 : 0)}
+                  {(ubicacionFilter !== "all" ? 1 : 0) + (nivelFilter !== "all" ? 1 : 0)}
                 </span>
               )}
             </Button>
@@ -303,7 +301,7 @@ export default function CreacionesHome() {
         {/* Filters Panel */}
         {showFilters && (
           <Card className="p-4 mb-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Nivel</label>
                 <Select value={nivelFilter} onValueChange={(val) => setNivelFilter(val as NivelCreacionesType | "all")}>
@@ -328,20 +326,6 @@ export default function CreacionesHome() {
                     <SelectItem value="all">Todas las ubicaciones</SelectItem>
                     {UBICACION_TYPES.map((ubicacion) => (
                       <SelectItem key={ubicacion} value={ubicacion}>{ubicacion}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">Tipo de Solicitud</label>
-                <Select value={solicitudFilter} onValueChange={(val) => setSolicitudFilter(val as SolicitudType | "all")}>
-                  <SelectTrigger data-testid="filter-solicitud">
-                    <SelectValue placeholder="Todas las solicitudes" />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-[300px]">
-                    <SelectItem value="all">Todas las solicitudes</SelectItem>
-                    {SOLICITUD_TYPES.map((type) => (
-                      <SelectItem key={type} value={type}>{type}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>

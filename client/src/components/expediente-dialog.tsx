@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { insertExpedienteSchema, SOLICITUD_TYPES, UBICACION_TYPES, NIVEL_CREACIONES_TYPES, type InsertExpediente, type Expediente } from "@shared/schema";
+import { insertExpedienteSchema, UBICACION_TYPES, NIVEL_CREACIONES_TYPES, type InsertExpediente, type Expediente } from "@shared/schema";
 import { Loader2 } from "lucide-react";
 
 interface ExpedienteDialogProps {
@@ -24,7 +24,7 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
     defaultValues: {
       expediente: "",
       nivel: "",
-      solicita: SOLICITUD_TYPES[0],
+      solicita: "",
       establecimiento: "",
       ubicacion: UBICACION_TYPES[0],
       comentario: "",
@@ -46,7 +46,7 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
         form.reset({
           expediente: "",
           nivel: "",
-          solicita: SOLICITUD_TYPES[0],
+          solicita: "",
           establecimiento: "",
           ubicacion: UBICACION_TYPES[0],
           comentario: "",
@@ -119,21 +119,14 @@ export function ExpedienteDialog({ open, onOpenChange, expediente, onSubmit, isP
               name="solicita"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tipo de Solicitud</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger data-testid="select-solicita">
-                        <SelectValue placeholder="Seleccionar tipo de solicitud" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent className="max-h-[300px]">
-                      {SOLICITUD_TYPES.map((type) => (
-                        <SelectItem key={type} value={type} data-testid={`option-solicita-${type.substring(0, 20)}`}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Solicitud</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Descripción de la solicitud"
+                      {...field}
+                      data-testid="input-solicita"
+                    />
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
