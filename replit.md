@@ -1,16 +1,21 @@
 # Creaciones - Subdirección Cobertura de Cargos
 
 ## Overview
-This is a tri-module management platform for educational institution records with PIN-based authentication. The platform has permanent dark gray mode and includes:
-1. **CREACIONES** (PIN: 1111) - Educational records (expedientes) management with 12 estado-specific counters, CRUD operations, search, and filters
-2. **COBERTURA DE CARGOS** (PIN: 1212) - Registration and statistics system with file uploads, interactive charts, and PDF reports
-3. **TITULARIZACIONES** (PIN: 1313) - Statistics dashboard with bar charts for 11 titularization types and searchable records table with PDF export
+This is a four-module management platform for educational institution records with user-based PIN authentication. The platform has permanent dark gray mode with professional analytics colors and includes:
+1. **CREACIONES** (4 users) - Educational records (expedientes) management with ubicación counters, CRUD operations, search, and filters
+2. **PUBLICACIONES** (6 users, internal name COBERTURA) - Registration and statistics system with file uploads, interactive charts, and PDF reports
+3. **TITULARIZACIONES** (2 users) - Statistics dashboard with bar charts for 11 titularization types and searchable records table with PDF export
+4. **INFORMES** (2 users) - System-wide activity tracking module that logs all user actions across modules (logins, data loads, edits, report generation)
 
 ## Recent Changes
 - 2026-01-01: Initial implementation of the platform with full CRUD functionality
 - 2026-01-01: Added institutional design with permanent dark gray color scheme
 - 2026-01-01: Implemented tri-module PIN authentication system
 - 2026-01-01: Added TITULARIZACIONES module with horizontal bar charts and PDF generation
+- 2026-01-10: Renamed COBERTURA module to PUBLICACIONES in UI
+- 2026-01-10: Implemented user-based authentication with individual PINs per module
+- 2026-01-10: Added professional analytics color palette (violet, blue, emerald, amber)
+- 2026-01-10: Added INFORMES module for system-wide activity tracking
 
 ## Project Architecture
 
@@ -82,6 +87,22 @@ This is a tri-module management platform for educational institution records wit
 - LEGAL Y TÉCNICA, DESPACHO, INNOVACIÓN, INFRAESTRUCTURA
 - GESTIÓN, HACIENDA, FIRMA MINISTRO, FIRMA INT.
 
+### ActividadLog (INFORMES module)
+- `id`: UUID
+- `usuario`: String (name of user who performed action)
+- `modulo`: String (CREACIONES, COBERTURA, TITULARIZACIONES, INFORMES)
+- `tipoActividad`: ActividadType (9 types)
+- `descripcion`: String
+- `fecha`: String (YYYY-MM-DD)
+- `hora`: String (HH:MM)
+- `detalles`: String (nullable)
+
+### Nomenclador de Tipos de Actividad (9 types)
+- CARGA_EXPEDIENTE, EDICION_EXPEDIENTE, ELIMINACION_EXPEDIENTE
+- GENERACION_INFORME
+- CARGA_REGISTRO, EDICION_REGISTRO, ELIMINACION_REGISTRO
+- INICIO_SESION, CIERRE_SESION
+
 ## API Endpoints
 ### Expedientes (CREACIONES)
 - `GET /api/expedientes` - List all expedientes
@@ -94,6 +115,10 @@ This is a tri-module management platform for educational institution records wit
 - `GET /api/titularizaciones/estadisticas` - Get statistics by type
 - `GET /api/titularizaciones/registros` - Get all records
 - `POST /api/titularizaciones/registros/report` - Generate PDF report
+
+### Informes (Activity Tracking)
+- `GET /api/informes/actividades` - Get all activity logs
+- `POST /api/informes/actividades` - Log a new activity
 
 ## Running the Project
 The application runs with `npm run dev` which starts:

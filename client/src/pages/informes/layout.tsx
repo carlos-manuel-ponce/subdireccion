@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import logoUrl from "@assets/LOGO_BLANCO_1767308770849.png";
-import type { ActividadLog, ModuleType } from "@shared/schema";
+import type { ActividadLog } from "@shared/schema";
 
 const ACTIVIDAD_LABELS: Record<string, string> = {
   CARGA_EXPEDIENTE: "Carga de Expediente",
