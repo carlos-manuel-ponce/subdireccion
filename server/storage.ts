@@ -1,4 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+dotenv.config();
 import {
   type Expediente,
   type InsertExpediente,
