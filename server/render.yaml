@@ -1,0 +1,15 @@
+# Render.com Blueprint for Express Backend
+
+services:
+  - type: web
+    name: subdireccion-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+# Agrega aquí cualquier otra variable de entorno que uses

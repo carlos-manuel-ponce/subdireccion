@@ -1,0 +1,4 @@
+# .gitignore para backend Express en Render
+node_modules/
+.env
+uploads/
