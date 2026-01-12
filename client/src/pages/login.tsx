@@ -1,13 +1,12 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { useMutation } from "@tanstack/react-query";
+
 import { Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
 import { MODULE_TYPES, type ModuleType } from "@shared/schema";
 
 export default function Login() {
@@ -16,42 +15,74 @@ export default function Login() {
   const [selectedModule, setSelectedModule] = useState<ModuleType | null>(null);
   const [pin, setPin] = useState("");
 
-  const loginMutation = useMutation({
-    mutationFn: async ({ module, pin }: { module: ModuleType; pin: string }) => {
-      const response = await apiRequest("POST", "/api/auth/login", { module, pin });
-      return response.json();
-    },
-    onSuccess: (data) => {
-      localStorage.setItem("authModule", data.module);
-      if (data.userName) {
-        localStorage.setItem("authUserName", data.userName);
+
+  // Usuarios y PINs hardcodeados (solo para uso provisorio/demo)
+  const USERS: Record<string, Array<{ name: string; pin: string }>> = {
+    CREACIONES: [
+      { name: "Nancy Carrizo", pin: "3087" },
+      { name: "Magdalena Martinez", pin: "2314" },
+      { name: "Antonella Escudero", pin: "1609" },
+      { name: "Manuel Ponce", pin: "1111" },
+    ],
+    COBERTURA: [
+      { name: "Nancy Carrizo", pin: "3087" },
+      { name: "Yanina Vargas", pin: "4457" },
+      { name: "Noelia Villa", pin: "8901" },
+      { name: "Axel Cabrera", pin: "4017" },
+      { name: "Laura Morales", pin: "9932" },
+      { name: "Manuel Ponce", pin: "1111" },
+    ],
+    TITULARIZACIONES: [
+      { name: "Nancy Carrizo", pin: "3087" },
+      { name: "Manuel Ponce", pin: "1111" },
+    ],
+    INFORMES: [
+      { name: "Nancy Carrizo", pin: "3087" },
+      { name: "Manuel Ponce", pin: "1111" },
+    ],
+    JUNTAS: [
+      { name: "Nancy Carrizo", pin: "3087" },
+      { name: "Manuel Ponce", pin: "1111" },
+    ],
+  };
+
+  const [isPending, setIsPending] = useState(false);
+
+  const handleLogin = () => {
+    if (!selectedModule) return;
+    setIsPending(true);
+    setTimeout(() => {
+      const user = USERS[selectedModule]?.find(u => u.pin === pin);
+      if (user) {
+        localStorage.setItem("authModule", selectedModule);
+        localStorage.setItem("authUserName", user.name);
+        if (selectedModule === "CREACIONES") {
+          setLocation("/creaciones");
+        } else if (selectedModule === "COBERTURA") {
+          setLocation("/cobertura");
+        } else if (selectedModule === "TITULARIZACIONES") {
+          setLocation("/titularizaciones");
+        } else if (selectedModule === "INFORMES") {
+          setLocation("/informes");
+        } else if (selectedModule === "JUNTAS") {
+          setLocation("/juntas");
+        }
+      } else {
+        toast({
+          title: "PIN Incorrecto",
+          description: "El PIN ingresado no es válido. Intente nuevamente.",
+          variant: "destructive",
+        });
+        setPin("");
       }
-      if (data.module === "CREACIONES") {
-        setLocation("/creaciones");
-      } else if (data.module === "COBERTURA") {
-        setLocation("/cobertura");
-      } else if (data.module === "TITULARIZACIONES") {
-        setLocation("/titularizaciones");
-      } else if (data.module === "INFORMES") {
-        setLocation("/informes");
-      } else if (data.module === "JUNTAS") {
-        setLocation("/juntas");
-      }
-    },
-    onError: () => {
-      toast({
-        title: "PIN Incorrecto",
-        description: "El PIN ingresado no es válido. Intente nuevamente.",
-        variant: "destructive",
-      });
-      setPin("");
-    },
-  });
+      setIsPending(false);
+    }, 500);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedModule && pin.length === 4) {
-      loginMutation.mutate({ module: selectedModule, pin });
+      handleLogin();
     }
   };
 
@@ -188,10 +219,10 @@ export default function Login() {
                   <Button
                     type="submit"
                     className="w-full"
-                    disabled={pin.length !== 4 || loginMutation.isPending}
+                    disabled={pin.length !== 4 || isPending}
                     data-testid="button-login"
                   >
-                    {loginMutation.isPending ? (
+                    {isPending ? (
                       "Verificando..."
                     ) : (
                       <>
