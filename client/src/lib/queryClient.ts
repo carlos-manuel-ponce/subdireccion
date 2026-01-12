@@ -7,12 +7,17 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+
+// Detect base API URL from env or fallback to relative
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const fullUrl = url.startsWith("http") ? url : API_BASE + url;
+  const res = await fetch(fullUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
